@@ -1,0 +1,2 @@
+{"_id":{"$oid":"5947976da03d580d27033117"},"actualTotalPowerLoad":260,"cabinetSize":"50*50*100","Numbering":"11","planningTotalPowerLoad":"1000","responsible":"somebody","serverRoomTitle":"1","startDate":"2017-6-18","thresholdPowerLoad":900}
+{"_id":{"$oid":"59479774a03d580d27033118"},"actualTotalPowerLoad":275,"cabinetSize":"50*50*100","Numbering":"12","planningTotalPowerLoad":"1000kw","responsible":"somebody","serverRoomTitle":"1","startDate":"2017-6-18","thresholdPowerLoad":90}

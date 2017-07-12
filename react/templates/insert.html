@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        function validateForm() {
+            var x = document.forms["myForm"]["fname"].value;
+            if (x == "") {
+                alert("Name must be filled out");
+                return false;
+            }
+            var y = document.forms["myForm"]["fage"].value;
+            if (y == "") {
+                alert("Age must be filled out");
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+<form name="myForm" action="/getalldeviceaaa"
+      onsubmit="return validateForm()" method="post">
+  Your name: <input type="text" name="fname">
+  <br><br>
+  <br><br>
+  <input type="submit" value="Submit">
+</form>
+
+
+</body>
+</html>
+
