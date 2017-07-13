@@ -271,110 +271,129 @@ def serverOn():
                 }
             }
         )
-        return("success")
+        return "success"
 
-
-#to change the "on cabinet/off cabinet" status 
-#when service number is 1, to put the server on cabinet with server number, 
-#when service number is 2, to turn off the server with server number
-#return 'success' when succeed
-@app.route('/changestatus', methods=['POST'])
-def serverOnCabinet():
+# to fetch the server from the cabinet
+@app.route('/offcabinet', methods=['POST'])
+def serverOffCabinet():
     serverNumbering = request.form["serverNumbering"] 
-    serviceNumber = request.form["serviceNumber"]
+    client = MongoClient() 
+    db = client.IDCs 
+    serverNumbering = str(serverNumbering)
+    db.server.update( 
+        { "Numbering": serverNumbering },
+        { "$set":
+            {
+            "actualPowerLoad":str(0),
+            "actualTemperature":str(0),
+            "cabinetNumbering":str(-1),
+            "startPosition": str(0),
+            "endPosition": str(0),
+            "onCabinet": str(0),
+            "on": str(0)
+            }
+        }
+    )
+    return "success"
+
+# find possible place where this server can be put in
+@app.route('/findposition', methods=['POST'])
+def find_position():
+    serverNumbering = request.form.get("serverNumbering") 
+    client = MongoClient() 
+    db = client.IDCs 
+    candidatePlace = {}
+    serverNumbering = str(serverNumbering)
+    maximumPower = db.server.find({"Numbering":serverNumbering},{"ratedPower":1,"_id":0})
+    maximumHeight = db.server.find({"Numbering":serverNumbering},{"height":1,"_id":0})
+    for record in maximumPower:
+        power = int(record['ratedPower'])
+    for record in maximumHeight:
+        height = int(record['height'])
+    cursor = db.Cabinet.find() 
+    for record in cursor:
+        cabinetNumbering = record["Numbering"]
+        cabinetUnumber = record["uNumber"]
+        cabinetActualPower = record["actualTotalPowerLoad"]
+        cabinetThresholdPower = record["thresholdPowerLoad"]
+        initial_value = 0
+        list_length = int(cabinetUnumber)
+        current_usage = [ initial_value for i in range(list_length)]
+        # Possible Choices
+        possible_choises = [ initial_value for i in range(list_length)]
+        cursor = db.server.find()
+        for record in cursor:
+            if record["cabinetNumbering"] == cabinetNumbering :
+                start = int(record["startPosition"])
+                end = int(record["endPosition"])
+                pos = start - 1
+                while pos < end:
+                    current_usage[pos] = 1
+                    pos += 1
+            # continues space
+        available_space_continues = False
+
+            # last unavailable position
+        last_unavailable_pos = 0
+
+        for i, x in enumerate(current_usage):
+            if x == 0:
+                    # available space
+                possible_choises[i] += 1
+                if available_space_continues:
+                    for j in range(last_unavailable_pos+1, i):
+                            # print j, i
+                        possible_choises[j] += 1
+
+                else:
+                    available_space_continues = True
+                        # available_space_continues = True
+            else:
+                last_unavailable_pos = i
+                available_space_continues = False
+
+        i = 0
+        find_position = False
+        while i < len(possible_choises):
+            if height > possible_choises[i] or (power+cabinetActualPower) > cabinetThresholdPower:
+                i += 1
+                continue
+            else:
+                startPos = i+1
+                endPos = i+height
+                candidatePlace[str(cabinetNumbering)] = {
+                    "cabinetNumbering": str(cabinetNumbering),
+                    "startPosition" : str(startPos),
+                    "endPosition" : str(endPos)
+                }
+                break
+    jsonStr = json.dumps(candidatePlace)
+    return jsonStr
+
+# to set the server on the cabinet
+@app.route('/oncabinet', methods=['POST'])
+def serverOnCabinet():
+
+    serverNumbering = request.form["serverNumbering"] 
     cabinetNumber = request.form["cabinetNumber"]
     startPosition = request.form["startPosition"]
     endPosition = request.form["endPosition"]
 
-    client = MongoClient() 
-    db = client.IDCs 
-
-    if int(serviceNumber) == 1:
-        serverNumbering = str(serverNumbering) 
-        db.server.update( 
-            { "Numbering": serverNumbering },
-            { "$set":
-                {
-                "cabinetNumbering":str(cabinetNumber),
-                "startPosition": str(startPosition),
-                "endPosition": str(endPosition),
-                "onCabinet": str(1)
-                }
+    client = MongoClient() #making a connection with MongoClient
+    db = client.IDCs #getting a database of MongoDB
+    serverNumbering = str(serverNumbering) 
+    db.server.update( # to update the server state whether its on the cabinet
+        { "Numbering": serverNumbering },
+        { "$set":
+            {
+            "cabinetNumbering":str(cabinetNumber),
+            "startPosition": str(startPosition),
+            "endPosition": str(endPosition),
+            "onCabinet": str(1)
             }
-        )
-        return("success")
-
-    # to fetch the server from the cabinet
-    elif int(serviceNumber) == 2:
-        serverNumbering = str(serverNumbering)
-        db.server.update( # to update the server state whether its on the cabinet
-            { "Numbering": serverNumbering },
-            { "$set":
-                {
-                "actualPowerLoad":str(0),
-                "actualTemperature":str(0),
-                "cabinetNumbering":str(-1),
-                "startPosition": str(0),
-                "endPosition": str(0),
-                "onCabinet": str(0),
-                "on": str(0)
-                }
-            }
-        )
-        #db.server.delete_one({'Numbering': serverNumbering})
-        #db.U.delete_one({'ServerNumbering': serverNumbering})
-        return("success")
-    # turn the server on
-    elif int(serviceNumber) == 3:
-        serverNumbering = str(serverNumbering)
-        maximumPower = db.server.find({"Numbering":serverNumbering},{"ratedPower":1,"_id":0}) # to find the ratedPower for this particular server
-        for record in maximumPower:
-            power = int(record['ratedPower'])
-        cabinetNumber = db.server.find({"Numbering":serverNumbering},{"cabinetNumbering":1,"_id":0}) # to find the cabinet of this server
-        for record in cabinetNumber:
-            CabinetNumber = record['cabinetNumbering']
-        print(CabinetNumber)
-        cabinetActualPower = db.Cabinet.find({"Numbering":CabinetNumber},{"actualTotalPowerLoad":1,"_id":0}) # to find the actual power and threshold power of this cabinet
-        for record in cabinetActualPower:
-            ActualPower = record['actualTotalPowerLoad']
-        cabinetThresholdPower = db.Cabinet.find({"Numbering":CabinetNumber},{"thresholdPowerLoad":1,"_id":0})
-        for record in cabinetThresholdPower:
-            ThresholdPower = record['thresholdPowerLoad']
-        powercabinet = db.Cabinet.find({"Numbering":CabinetNumber},{"NumberingPowerCabinet":1,"_id":0}) # to find the actual power and threshold power of this cabinet
-        for record in powercabinet:
-            powerCabinetNumber = record['NumberingPowerCabinet']
-        powerCabinetThresholdPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"thresholdPowerLoad":1,"_id":0})
-        for record in powerCabinetThresholdPower:
-            CabinetThresholdPower = record['thresholdPowerLoad']
-        powerCabinetActualPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"actualTotalPowerLoad":1,"_id":0})
-        for record in powerCabinetActualPower:
-            CabinetActualPower = record['actualTotalPowerLoad']
-        if (power+ActualPower) > ThresholdPower or (power+CabinetActualPower) > CabinetThresholdPower:
-            return("false")
-        else:
-            db.server.update( # to update the server state whether its on the cabinet
-                { "Numbering": serverNumbering },
-                { "$set":
-                    {
-                    "on": str(1)
-                    }
-                }
-            )
-            return("success")
-    # turn the server off
-    else:
-        serverNumbering = str(serverNumbering)
-        db.server.update(
-            { "Numbering": serverNumbering },
-            { "$set":
-                {
-                "actualPowerLoad":str(0),
-                "actualTemperature":str(0),
-                "on": str(0)
-                }
-            }
-        )
-        return("success")
+        }
+    )
+    return "success"
 
 
 if __name__ == '__main__':
