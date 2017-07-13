@@ -922,15 +922,10 @@ var demo = {
     let findFaultServer = false;
 
     rackDeviceData.forEach((data) => {
-      // const number = Math.floor(Math.random() * 3) + 1;
       const serverData = demo.serverRealTimeData.find(e => e.Numbering === data.id);
       const serverHeight = parseInt(data.height, 10);
       const bottomGap = gap + serverHeight * size / 2;
       const pic = `server${serverHeight}.png`;
-
-      // if (number === 3) {
-      //   pic = 'server2.png';
-      // }
 
       const color = !findFaultServer && severity ? severity.color : null;
       const server = this.createServer(box, cube, cut, pic, color, oldRack, Object.assign({}, serverData, data));

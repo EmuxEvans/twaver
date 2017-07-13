@@ -1,6 +1,21 @@
 {
   "parser": "babel-eslint",
   "extends": "airbnb",
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "globals": {
+    "mono": true,
+    "twaver": true
+  },
   "rules": {
     "generator-star-spacing": [0],
     "consistent-return": [0],
@@ -29,10 +44,5 @@
       "named": "never",
       "asyncArrow": "always"
     }]
-  },
-  "parserOptions": {
-    "ecmaFeatures": {
-      "experimentalObjectRestSpread": true
-    }
   }
 }
