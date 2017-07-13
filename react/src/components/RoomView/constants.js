@@ -1,0 +1,42 @@
+const singleServerSize = 4.445;
+
+export default {
+  size: singleServerSize,
+  picMap: {
+    'server1.png': singleServerSize,
+    'server2.png': singleServerSize * 2,
+    'server3.png': singleServerSize * 3,
+    'server4.png': singleServerSize * 4,
+    'server5.png': singleServerSize * 5,
+    'server6.png': singleServerSize * 6,
+    'server7.png': singleServerSize * 7,
+    'server8.png': singleServerSize * 8,
+  },
+  spaceColor: '#286090',
+  solidColor: '#A4A4A4',
+  translateRack: {
+    serverRoomTitle: '机房编号',
+    Numbering: '机柜编号',
+    responsible: '责任人',
+    startDate: '安装日期',
+    thresholdPowerLoad: '功率告警阈值',
+    thresholdCoolingLoad: '温度告警阈值',
+    actualTotalPowerLoad: '实际功率',
+    actualTemperature: '实际温度',
+    NumberingPowerCabinet: '机柜头柜编号',
+    uNumber: '机柜总槽位',
+  },
+  translateDevice: {
+    Numbering: '设备编号',
+    cabinetNumbering: '机柜编号',
+    uNumbering: '安装位置',
+    height: '设备高度（U）',
+    category: '设备类型',
+    responsible: '责任人',
+    ratedPower: '额定功率',
+    actualPowerLoad: '实际功率',
+    actualTemperature: '实际功率',
+    thresholdTemperature: '温度告警阈值',
+    on: '是否上电',
+  },
+};
