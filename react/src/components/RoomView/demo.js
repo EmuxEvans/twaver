@@ -10,6 +10,8 @@ const size = constants.size;
 const picMap = constants.picMap;
 const translateDevice = constants.translateDevice;
 const translateRack = constants.translateRack;
+const solidColor = constants.solidColor;
+const spaceColor = constants.spaceColor;
 
 var demo = {
   LAZY_MIN: 1000,
