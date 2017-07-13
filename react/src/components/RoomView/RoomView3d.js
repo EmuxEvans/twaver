@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
+import { Spin } from 'antd';
 
-import { getDeviceData, getRackData } from './Fetch';
+import { getAllCabinet, getAllDevice } from '../../services/app';
 import dataJson from './modelData';
 import demo from './demo';
 
-const deviceData = [];
-
-function setDeviceData(response) {
+function setDeviceData(response, deviceData) {
   demo.serverRealTimeData = handleDeviceData(response);
   demo.serverRealTimeData.forEach((element) => {
     const obj = {
@@ -26,6 +25,7 @@ function setDeviceData(response) {
 function setRackData(response) {
   demo.cabinet = handleData(response);
   const racks = dataJson.objects.find(e => e.type === 'racks');
+  racks.clients = [];
   demo.cabinet.forEach((e, i) => {
     const client = {};
     client.id = e.Numbering;
@@ -75,22 +75,38 @@ function getStringNumber(number) {
 class RoomView3d extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      loading: false,
+    };
     this.mainDivId = 'room-view-3d';
   }
 
   componentDidMount() {
-    getDeviceData()
-      .then((res) => {
-        setDeviceData(res);
+    const deviceData = [];
+    this.setState({
+      loading: true,
+    });
+    getAllDevice()
+      .then(({ data: res }) => {
+        setDeviceData(res, deviceData);
       })
       .then(() => {
-        return getRackData();
+        return getAllCabinet();
       })
-      .then((res) => {
+      .then(({ data: res }) => {
         setRackData(res);
       })
       .then(() => {
+        this.setState({
+          loading: false,
+        });
         demo.init(this.mainDivId, dataJson, deviceData);
+      })
+      .catch(({ err }) => {
+        console.log(err);
+        this.setState({
+          loading: false,
+        });
       });
   }
 
@@ -101,7 +117,9 @@ class RoomView3d extends Component {
   render() {
     return (
       <div>
-        <div id={this.mainDivId} style={{ width: 1000, height: 600, position: 'relative' }} />
+        <Spin spinning={this.state.loading} delay={300} size="large">
+          <div id={this.mainDivId} style={{ width: 1000, height: 600, position: 'relative' }} />
+        </Spin>
       </div>
     );
   }

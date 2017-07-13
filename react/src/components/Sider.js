@@ -26,7 +26,7 @@ class Nsider extends React.Component {
           selectedKeys={[pathname]}
           mode={this.state.mode}
         >
-          <SubMenu key="sub1" title={<span><Icon type="setting" /><span>机房视图</span></span>}>
+          <SubMenu key="sub1" title={<span><Icon type="environment-o" /><span>机房视图</span></span>}>
             <Menu.Item key="/roomView3d"><Link to="/roomView3d">3D机房视图</Link></Menu.Item>
             <Menu.Item key="/roomView2d"><Link to="/roomView2d">2D机房视图</Link></Menu.Item>
           </SubMenu>
