@@ -971,7 +971,7 @@ var demo = {
       'm.ambient': color,
     });
     serverPanel.setPosition(0, 0.5, serverBody.getDepth() / 2 + (cube.getDepth() - serverBody.getDepth()) / 2);
-    if (pic == 'server3.png') {
+    if (pic == 'server7.png') {
       const serverColor = '#FFFFFF';
       serverPanel.s({
         'm.color': serverColor,
@@ -1428,6 +1428,8 @@ var demo = {
     });
     cube.s({
       'top.m.visible': true,
+      'top.m.transparent': true,
+      'top.m.opacity': 1,
       'top.m.texture.image': demo.createTemperatureWallImage(width, depth, demo.dataJson.temperatureData),
       'm.side': mono.DoubleSide,
       'm.type': 'phong',
@@ -1449,7 +1451,6 @@ var demo = {
 
     const heatmap = Heatmap.create({
       container: div,
-      backgroundColor: '#428bcb',
       radius: 200,
       maxOpacity: 0.8,
     });

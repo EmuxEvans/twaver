@@ -1,9 +1,9 @@
 import request from '../utils/request';
 
 export async function getAllDevice() {
-  return request('/getalldevice', { method: 'get' });
+  return request('/getalldevice');
 }
 
 export async function getAllCabinet() {
-  return request('/getallcabinet', { method: 'get' });
+  return request('/getallcabinet');
 }
