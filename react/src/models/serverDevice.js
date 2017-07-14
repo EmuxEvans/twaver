@@ -14,7 +14,7 @@ export default {
 
 	effects: {
 		*fetch({ payload: { page }}, { call put }) {
-			const { data, headers } = yield call( deviceService.fetch, { page });
+			const { data, headers } yield call( deviceService.fetch, { page });
 			yield put({ type: 'save', payload: { data, total: headers['x-total-count'] }});
 		},
 	},
