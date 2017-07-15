@@ -40,6 +40,7 @@ export default class OnandOff extends React.Component{
 
   componentDidMount =()=>{
     this.loadData();
+
   }
 
   loadData=() =>{
@@ -119,7 +120,7 @@ export default class OnandOff extends React.Component{
 
     fetch("http://127.0.0.1:5000/onandoff" , {
       method: 'POST',
-      mode: 'no-cors',
+      //mode: 'no-cors',
       header: {
         "Content-Type": 'application/json',
         "Accept": 'application/json'

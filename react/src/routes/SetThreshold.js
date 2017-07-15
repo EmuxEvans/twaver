@@ -1,4 +1,4 @@
-import { Table, Input, Popconfirm } from 'antd';
+import { Table, Input, Popconfirm, message } from 'antd';
 const urlgetcabinet = "http://127.0.0.1:5000/getallcabinet";
 const urlsetthreshold = "http://127.0.0.1:5000/setthresholdvalue";
 
@@ -7,6 +7,7 @@ class EditableCell extends React.Component {
     value: this.props.value,
     editable: this.props.editable || false,
   }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.editable !== this.state.editable) {
       this.setState({ editable: nextProps.editable });
@@ -23,14 +24,17 @@ class EditableCell extends React.Component {
       }
     }
   }
+
   shouldComponentUpdate(nextProps, nextState) {
     return nextProps.editable !== this.state.editable ||
            nextState.value !== this.state.value;
   }
+
   handleChange(e) {
     const value = e.target.value;
     this.setState({ value });
   }
+
   render() {
     const { value, editable } = this.state;
     return (
@@ -98,6 +102,7 @@ export default class EditableTable extends React.Component {
 
   componentDidMount =()=>{
     this.loadData();
+    setInterval(this.loadData, 20000);    
   }
 
   loadData=() =>{
@@ -182,10 +187,14 @@ export default class EditableTable extends React.Component {
         },
         body: formdata
       })
-      .then(function(resp) {
-        if(resp.ok) {
-          console.log("success RESP");
-        }
+      .then(resp => resp.json())
+      .then(resp => {
+        if(resp.status == "success")
+          message.success('阈值已修改');
+      })
+      .catch(error => {
+        console.log(error);
+        message.warning('修改失败');
       });
     });
   }

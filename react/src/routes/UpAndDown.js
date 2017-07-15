@@ -52,6 +52,7 @@ export default class NestedTable extends Component {
 
   componentDidMount() {
     this.loadData();
+
   }
 
   loadData =()=>{

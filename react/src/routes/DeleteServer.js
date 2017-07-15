@@ -1,4 +1,4 @@
-import { Table, Input, Icon, Button, Popconfirm } from 'antd';
+import { Table, Input, Icon, Button, Popconfirm, message } from 'antd';
 const urlsendindex = 'http://127.0.0.1:5000/deletedevice';
 const urlgetdata = 'http://127.0.0.1:5000/getalldevice';
 
@@ -42,6 +42,7 @@ export default class EditableTable extends React.Component {
 
   componentDidMount =()=>{
     this.loadData();
+    //setInterval(this.loadData, 20000);
   }
 
   loadData=() =>{
@@ -118,10 +119,16 @@ export default class EditableTable extends React.Component {
       },
       body: data
     })
-    .then(function(resp) {
-      if(resp.ok) {
-        console.log("success RESP");
+    .then(resp => resp.json())
+    .then(resp => {
+      if(resp.status == "success") {
+        message.success('成功删除设备');
+        this.loadData();
       }
+    })
+    .catch(error => {
+      console.log(error);
+      message.warning('删除失败');
     });
 
     this.setState({ dataSource });

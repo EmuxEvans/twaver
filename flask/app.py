@@ -60,18 +60,15 @@ def insertDevice():
     mydata["thresholdTemperature"] = str(thresholdTemperature)
     mydata["onCabinet"] = str(onCabinet)
     mydata["on"] = str(on)
-    '''
+    
     client = MongoClient()
     db = client.IDCs
     collection = db.server
     collection.insert_one(mydata)
-    return 'success'
-    '''
     status = {
         'status':'success'
     }
     return jsonify(status)
-
 
 
 
@@ -148,7 +145,10 @@ def deleteServer():
     client = MongoClient()
     db = client.IDCs
     db.server.delete_one({'Numbering': num})
-    return "success"
+    status = {
+        'status':'success'
+    }
+    return jsonify(status)
 
 
 #reset the threshold value with cabinet number
@@ -170,7 +170,10 @@ def setthreshold():
             }
         }
     )
-    return "success"
+    status = {
+        'status':'success'
+    }
+    return jsonify(status)
 
 
 #return the information of all devices in JSON
@@ -237,16 +240,11 @@ def searchCabinet():
 @app.route('/onandoff', methods=['POST'])
 def serverOn():
 
-    serverNumbering = request.form["serverNumbering"] #to get the data from the front end
-    #to do the right thing(1-put the server on the cabinet; 2-fetch the server from the cabinet; 3-turn the server on; 4-turn the server off)
+    serverNumbering = request.form["serverNumbering"] 
     serviceNumber = request.form["serviceNumber"]
-    '''
-    serverNumbering = 128 #to get the data from the front end
-    #to do the right thing(1-put the server on the cabinet; 2-fetch the server from the cabinet; 3-turn the server on; 4-turn the server off)
-    '''
-    client = MongoClient() #making a connection with MongoClient
-    db = client.IDCs #getting a database of MongoDB
-    # to turn on the server
+
+    client = MongoClient()
+    db = client.IDCs 
     if int(serviceNumber) == 1:
         serverNumbering = str(serverNumbering)
 
@@ -258,7 +256,7 @@ def serverOn():
         onCabinet = db.server.find({"Numbering":serverNumbering},{"onCabinet":1,"_id":0}) # to find the ratedPower for this particular server
         for record in onCabinet:
             cabinet = int(record['onCabinet'])
-        #print(cabinet)
+
         if cabinet == 0:
             status = {
                 'status':'onfalse'
@@ -268,7 +266,6 @@ def serverOn():
         cabinetNumber = db.server.find({"Numbering":serverNumbering},{"cabinetNumbering":1,"_id":0}) # to find the cabinet of this server
         for record in cabinetNumber:
             CabinetNumber = record['cabinetNumbering']
-        #print(CabinetNumber)
 
         cabinetActualPower = db.Cabinet.find({"Numbering":CabinetNumber},{"actualTotalPowerLoad":1,"_id":0}) # to find the actual power and threshold power of this cabinet
         for record in cabinetActualPower:
@@ -282,7 +279,6 @@ def serverOn():
         for record in powercabinet:
             powerCabinetNumber = record['NumberingPowerCabinet']
 
-        #print(powerCabinetNumber)
         powerCabinetThresholdPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"thresholdPowerLoad":1,"_id":0})
         for record in powerCabinetThresholdPower:
             CabinetThresholdPower = record['thresholdPowerLoad']
@@ -297,7 +293,7 @@ def serverOn():
             }
             return jsonify(status)
 
-        db.server.update( # to update the server state whether its on the cabinet
+        db.server.update( 
             { "Numbering": serverNumbering },
             { "$set":
                 {
@@ -309,10 +305,10 @@ def serverOn():
             'status':'success'
         }
         return jsonify(status)
-    # turn the server off
+
     else:
         serverNumbering = str(serverNumbering)
-        on = db.server.find({"Numbering":serverNumbering},{"on":1,"_id":0}) # to find the ratedPower for this particular server
+        on = db.server.find({"Numbering":serverNumbering},{"on":1,"_id":0}) 
         for record in on:
             On = int(record['on'])
         if On == 0:
@@ -346,10 +342,10 @@ def serverOffCabinet():
     db = client.IDCs
     serverNumbering = str(serverNumbering)
 
-    onCabinet = db.server.find({"Numbering":serverNumbering},{"onCabinet":1,"_id":0}) # to find the ratedPower for this particular server
+    onCabinet = db.server.find({"Numbering":serverNumbering},{"onCabinet":1,"_id":0}) 
     for record in onCabinet:
         cabinet = int(record['onCabinet'])
-        #print(cabinet)
+
     if cabinet == 0:
         status = {
             'status':'onfalse'
@@ -410,24 +406,21 @@ def find_position():
                 while pos < end:
                     current_usage[pos] = 1
                     pos += 1
-            # continues space
+
         available_space_continues = False
 
-            # last unavailable position
         last_unavailable_pos = 0
 
         for i, x in enumerate(current_usage):
             if x == 0:
-                    # available space
                 possible_choises[i] += 1
                 if available_space_continues:
                     for j in range(last_unavailable_pos+1, i):
-                            # print j, i
                         possible_choises[j] += 1
 
                 else:
                     available_space_continues = True
-                        # available_space_continues = True
+
             else:
                 last_unavailable_pos = i
                 available_space_continues = False
@@ -459,10 +452,10 @@ def serverOnCabinet():
     startPosition = request.form["startPosition"]
     endPosition = request.form["endPosition"]
 
-    client = MongoClient() #making a connection with MongoClient
-    db = client.IDCs #getting a database of MongoDB
+    client = MongoClient() 
+    db = client.IDCs 
     serverNumbering = str(serverNumbering)
-    db.server.update( # to update the server state whether its on the cabinet
+    db.server.update( 
         { "Numbering": serverNumbering },
         { "$set":
             {
@@ -473,7 +466,10 @@ def serverOnCabinet():
             }
         }
     )
-    return "success"
+    status = {
+        'status':'success'
+    }
+    return jsonify(status)
 
 
 if __name__ == '__main__':
