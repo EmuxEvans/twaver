@@ -2,7 +2,7 @@ import {
   Form, Select, InputNumber, Switch, Radio, Pagination,
   Slider, Button, Upload, Icon, message, Input
 } from 'antd';
-import styles from './InputBlock.css';
+// import styles from './InputBlock.css';
 const FormItem = Form.Item;
 const Option = Select.Option;
 

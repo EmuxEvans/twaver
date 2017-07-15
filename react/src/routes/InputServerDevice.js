@@ -3,7 +3,7 @@ import {
   Slider, Button, Upload, Icon, message, Input
 } from 'antd';
 import PropTypes from 'prop-types';
-import styles from './InputBlock.css';
+// import styles from './InputBlock.css';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
