@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Badge, Menu, Dropdown, Icon } from 'antd';
+import { Table, Badge, Menu, Dropdown, Icon, message } from 'antd';
 const urlgetdata = "http://127.0.0.1:5000/getalldevice";
 const urloffcabinet = "http://127.0.0.1:5000/offcabinet";
 
@@ -19,9 +19,6 @@ export default class NestedTable extends Component {
         title: '操作', 
         key: 'operation', 
         render: (text, record, index) => {
-          //console.log("record a", record);
-          //console.log("text a", text);
-          //console.log("index a", index);
           return (
             <a onClick={() => this.offCabinet(record.Numbering)}>下柜</a> 
           );
@@ -90,29 +87,31 @@ export default class NestedTable extends Component {
   offCabinet = (numbering) => {
     const {data} = this.state;
 
-    Object.keys(data).forEach((key) => {
-      if(data[key].Numbering == numbering) {
-        data[key].onCabinet = "未上柜";
-      }
-    });
-    this.setState({ data });
-
     var formdata = new FormData();
     formdata.append('serverNumbering', numbering);
 
     fetch("http://127.0.0.1:5000/offcabinet" , {
       method: 'POST',
-      mode: 'cors',
+    
       header: {
         "Content-Type": 'application/json',
         "Accept": 'application/json'
       },
       body: formdata
     })
-    .then(function(resp) {
-      if(resp.ok) {
-        console.log("success RESP");
+    .then(resp => resp.json())
+    .then(resp => {
+      if(resp.status == "success") {
+        message.success('下柜成功');
+        Object.keys(data).forEach((key) => {
+          if(data[key].Numbering == numbering) {
+            data[key].onCabinet = "未上柜";
+          }
+        });
+        this.setState({ data });
       }
+      if(resp.status == "onfalse")
+        message.warning('该设备未上柜，无法下柜');
     });
   }
 

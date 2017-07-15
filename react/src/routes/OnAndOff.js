@@ -1,4 +1,4 @@
-import { Table } from 'antd';
+import { Table, message } from 'antd';
 const urlgetdata = "http://127.0.0.1:5000/getalldevice";
 const urlonandoff = "http://127.0.0.1:5000/onandoff";
 
@@ -113,43 +113,40 @@ export default class OnandOff extends React.Component{
   turnOn = (numbering) => {
     const dataSource = [...this.state.dataSource];
 
-    Object.keys(dataSource).forEach((key) => {
-      if(dataSource[key].Numbering == numbering) {
-        dataSource[key].on = "已上电";
-      }
-    });
-    this.setState({ dataSource });
-
     var data = new FormData();
     data.append('serverNumbering', numbering);
     data.append('serviceNumber', 1);
 
     fetch("http://127.0.0.1:5000/onandoff" , {
       method: 'POST',
-      mode: 'cors',
+      mode: 'no-cors',
       header: {
         "Content-Type": 'application/json',
         "Accept": 'application/json'
       },
       body: data
     })
-    .then(function(resp) {
-      if(resp.ok) {
-        console.log("success RESP");
+    .then(resp => resp.json())
+    .then(resp =>  {
+      if(resp.status == "success") {
+        message.success('上电成功');
+        Object.keys(dataSource).forEach((key) => {
+          if(dataSource[key].Numbering == numbering) {
+            dataSource[key].on = "已上电";
+          }
+        });
+        this.setState({ dataSource });
       }
-    });
+      if(resp.status == "fail") 
+        message.warning('超过机柜阈值，无法上电');
+      if(resp.status == "onfalse") 
+        message.warning('该设备未上柜，无法上电');
 
+    });
   }
 
   turnOff = (numbering) => {
     const dataSource = [...this.state.dataSource];
-
-    Object.keys(dataSource).forEach((key) => {
-      if(dataSource[key].Numbering == numbering) {
-        dataSource[key].on = "未上电";
-      }
-    });
-    this.setState({ dataSource });
 
     var data = new FormData();
     data.append('serverNumbering', numbering);
@@ -164,12 +161,23 @@ export default class OnandOff extends React.Component{
       },
       body: data
     })
-    .then(function(resp) {
-      if(resp.ok) {
-        console.log("success RESP");
-      }
+    .then(resp => resp.json())
+    .then(resp => {
+      if(resp.status == "success") {
+        message.success('下电成功');
+        Object.keys(dataSource).forEach((key) => {
+          if(dataSource[key].Numbering == numbering) {
+            dataSource[key].on = "未上电";
+          }
     });
-
+    this.setState({ dataSource });
+      }
+      if(resp.status == "onCabinetfalse") {
+        message.warning('该设备未上柜，无法下电');
+      }
+      if(resp.status == "onfalse")
+        message.warning('该设备未上电，无法下电')
+    });
   }
 
 

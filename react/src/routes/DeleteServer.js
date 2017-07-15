@@ -56,7 +56,10 @@ export default class EditableTable extends React.Component {
           var temp = new Object();  
           temp["key"]= resp[i].Numbering;
           temp["deviceNo"]=resp[i].Numbering;
-          temp["cabinetNo"]=resp[i].cabinetNumbering;
+          if(resp[i].cabinetNumbering == '-1')
+            temp["cabinetNo"] = "该设备未上柜";
+          else
+            temp["cabinetNo"] = resp[i].cabinetNumbering;
           temp["ratedPower"]=resp[i].ratedPower;
           switch(resp[i].category) {
             case "11": {

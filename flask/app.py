@@ -18,21 +18,35 @@ CORS(app)
 #return 'success' when succeed
 @app.route('/insertdevice', methods=['POST'])
 def insertDevice():
-    serverNumbering = request.form.get("Numbering") 
-    cabinetNumbering = request.form.get("cabinetnumbering")
+    serverNumbering = request.form.get("Numbering")
+    #cabinetNumbering = request.form.get("cabinetnumbering")
     height = request.form.get("height")
     category = request.form.get("category")
     responsible = request.form.get("responsible")
     ratedPower = request.form.get("ratedpower")
     thresholdTemperature = request.form.get("thresholdtemperature")
+    cabinetNumbering = str(-1)
     actualPowerLoad = str(0)
     actualTemperature = str(0)
     startPosition = str(0)
     endPosition = str(0)
-    onCabinet = str(0) 
-    on = str(0) 
+    onCabinet = str(0)
+    on = str(0)
 
-    mydata = {} 
+    serverNumber = str(serverNumbering)
+    client = MongoClient()
+    db = client.IDCs
+    collection = db.server
+    cursor=collection.find()
+    for record in cursor:
+        if serverNumber == record["Numbering"]:
+            status = {
+                'status':'fail'
+            }
+            return jsonify(status)
+
+
+    mydata = {}
     mydata["Numbering"] = str(serverNumbering)
     mydata["cabinetNumbering"] = str(cabinetNumbering)
     mydata["startPosition"] = str(startPosition)
@@ -46,12 +60,19 @@ def insertDevice():
     mydata["thresholdTemperature"] = str(thresholdTemperature)
     mydata["onCabinet"] = str(onCabinet)
     mydata["on"] = str(on)
-
-    client = MongoClient() 
-    db = client.IDCs 
-    collection = db.server 
-    collection.insert_one(mydata) 
+    '''
+    client = MongoClient()
+    db = client.IDCs
+    collection = db.server
+    collection.insert_one(mydata)
     return 'success'
+    '''
+    status = {
+        'status':'success'
+    }
+    return jsonify(status)
+
+
 
 
 #insert the information of the new frame to the collection candidateServer
@@ -88,9 +109,9 @@ def insertFrame():
     mydata["officer"] = officer
     mydata["contaction"] = contaction
 
-    client = MongoClient() 
+    client = MongoClient()
     db = client.IDCs
-    collection = db.server 
+    collection = db.server
     collection.insert_one(mydata)
     return 'success'
 
@@ -111,10 +132,10 @@ def insertModule():
     mydata["brand"] = brand
     mydata["typeSpec"] = typeSpec
 
-    client = MongoClient() 
-    db = client.IDCs 
-    collection = db.server 
-    collection.insert_one(mydata) 
+    client = MongoClient()
+    db = client.IDCs
+    collection = db.server
+    collection.insert_one(mydata)
     return 'success'
 
 
@@ -122,10 +143,10 @@ def insertModule():
 #return 'success' when succeed
 @app.route('/deletedevice', methods=['POST'])
 def deleteServer():
-    serverNumbering = request.form.get("deviceNo") 
+    serverNumbering = request.form.get("deviceNo")
     num = str(serverNumbering)
     client = MongoClient()
-    db = client.IDCs 
+    db = client.IDCs
     db.server.delete_one({'Numbering': num})
     return "success"
 
@@ -134,16 +155,16 @@ def deleteServer():
 #return 'success' when succeed
 @app.route('/setthresholdvalue', methods=['POST'])
 def setthreshold():
-    cabinetNumbering = request.form.get("cabinetNumbering") 
+    cabinetNumbering = request.form.get("cabinetNumbering")
     thresholdPower = request.form.get("thresholdPower")
     print cabinetNumbering
     print thresholdPower
     num = str(cabinetNumbering)
-    client = MongoClient() 
-    db = client.IDCs 
+    client = MongoClient()
+    db = client.IDCs
     db.Cabinet.update(
-        { "Numbering": num }, 
-        { "$set": 
+        { "Numbering": num },
+        { "$set":
             {
             "thresholdPowerLoad": thresholdPower
             }
@@ -155,9 +176,9 @@ def setthreshold():
 #return the information of all devices in JSON
 @app.route('/getalldevice', methods=['GET'])
 def searchServer():
-    client = MongoClient() 
-    db = client.IDCs 
-    collection = db.server 
+    client = MongoClient()
+    db = client.IDCs
+    collection = db.server
     cursor=collection.find()
     resultlist={}
     for record in cursor:
@@ -184,9 +205,9 @@ def searchServer():
 #return the information of all cabinets in JSON
 @app.route('/getallcabinet', methods=['GET'])
 def searchCabinet():
-    client = MongoClient() 
+    client = MongoClient()
     db = client.IDCs
-    collection = db.Cabinet 
+    collection = db.Cabinet
     cursor=collection.find()
     resultlist={}
     for record in cursor:
@@ -216,54 +237,93 @@ def searchCabinet():
 @app.route('/onandoff', methods=['POST'])
 def serverOn():
 
-    serverNumbering = request.form["serverNumbering"]
+    serverNumbering = request.form["serverNumbering"] #to get the data from the front end
+    #to do the right thing(1-put the server on the cabinet; 2-fetch the server from the cabinet; 3-turn the server on; 4-turn the server off)
     serviceNumber = request.form["serviceNumber"]
-
-    client = MongoClient() 
-    db = client.IDCs 
-
+    '''
+    serverNumbering = 128 #to get the data from the front end
+    #to do the right thing(1-put the server on the cabinet; 2-fetch the server from the cabinet; 3-turn the server on; 4-turn the server off)
+    '''
+    client = MongoClient() #making a connection with MongoClient
+    db = client.IDCs #getting a database of MongoDB
+    # to turn on the server
     if int(serviceNumber) == 1:
         serverNumbering = str(serverNumbering)
-        maximumPower = db.server.find({"Numbering":serverNumbering},{"ratedPower":1,"_id":0}) 
+
+        maximumPower = db.server.find({"Numbering":serverNumbering},{"ratedPower":1,"_id":0}) # to find the ratedPower for this particular server
         for record in maximumPower:
             power = int(record['ratedPower'])
-        cabinetNumber = db.server.find({"Numbering":serverNumbering},{"cabinetNumbering":1,"_id":0}) 
+
+
+        onCabinet = db.server.find({"Numbering":serverNumbering},{"onCabinet":1,"_id":0}) # to find the ratedPower for this particular server
+        for record in onCabinet:
+            cabinet = int(record['onCabinet'])
+        #print(cabinet)
+        if cabinet == 0:
+            status = {
+                'status':'onfalse'
+            }
+            return jsonify(status)
+
+        cabinetNumber = db.server.find({"Numbering":serverNumbering},{"cabinetNumbering":1,"_id":0}) # to find the cabinet of this server
         for record in cabinetNumber:
             CabinetNumber = record['cabinetNumbering']
-        print(CabinetNumber)
-        cabinetActualPower = db.Cabinet.find({"Numbering":CabinetNumber},{"actualTotalPowerLoad":1,"_id":0}) 
+        #print(CabinetNumber)
+
+        cabinetActualPower = db.Cabinet.find({"Numbering":CabinetNumber},{"actualTotalPowerLoad":1,"_id":0}) # to find the actual power and threshold power of this cabinet
         for record in cabinetActualPower:
             ActualPower = record['actualTotalPowerLoad']
+
         cabinetThresholdPower = db.Cabinet.find({"Numbering":CabinetNumber},{"thresholdPowerLoad":1,"_id":0})
         for record in cabinetThresholdPower:
             ThresholdPower = record['thresholdPowerLoad']
-        powercabinet = db.Cabinet.find({"Numbering":CabinetNumber},{"NumberingPowerCabinet":1,"_id":0})
+
+        powercabinet = db.Cabinet.find({"Numbering":CabinetNumber},{"NumberingPowerCabinet":1,"_id":0}) # to find the actual power and threshold power of this cabinet
         for record in powercabinet:
             powerCabinetNumber = record['NumberingPowerCabinet']
+
+        #print(powerCabinetNumber)
         powerCabinetThresholdPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"thresholdPowerLoad":1,"_id":0})
         for record in powerCabinetThresholdPower:
             CabinetThresholdPower = record['thresholdPowerLoad']
+
         powerCabinetActualPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"actualTotalPowerLoad":1,"_id":0})
         for record in powerCabinetActualPower:
             CabinetActualPower = record['actualTotalPowerLoad']
-        if (power+ActualPower) > ThresholdPower or (power+CabinetActualPower) > CabinetThresholdPower:
-            return("false")
-        else:
-            db.server.update(
-                { "Numbering": serverNumbering }, 
-                { "$set": 
-                    {
-                    "on": str(1)
-                    }
-                }
-            )
-            return("success")
 
+        if (power+ActualPower) > ThresholdPower or (power+CabinetActualPower) > CabinetThresholdPower:
+            status = {
+                'status':'fail'
+            }
+            return jsonify(status)
+
+        db.server.update( # to update the server state whether its on the cabinet
+            { "Numbering": serverNumbering },
+            { "$set":
+                {
+                "on": str(1)
+                }
+            }
+        )
+        status = {
+            'status':'success'
+        }
+        return jsonify(status)
+    # turn the server off
     else:
         serverNumbering = str(serverNumbering)
+        on = db.server.find({"Numbering":serverNumbering},{"on":1,"_id":0}) # to find the ratedPower for this particular server
+        for record in on:
+            On = int(record['on'])
+        if On == 0:
+            status = {
+                'status': 'onfalse'
+            }
+            return jsonify(status)
+        serverNumbering = str(serverNumbering)
         db.server.update(
-            { "Numbering": serverNumbering }, 
-            { "$set": 
+            { "Numbering": serverNumbering },
+            { "$set":
                 {
                 "actualPowerLoad":str(0),
                 "actualTemperature":str(0),
@@ -271,16 +331,32 @@ def serverOn():
                 }
             }
         )
-        return "success"
+        status = {
+            'status':'success'
+        }
+        return jsonify(status)
+
+
 
 # to fetch the server from the cabinet
 @app.route('/offcabinet', methods=['POST'])
 def serverOffCabinet():
-    serverNumbering = request.form["serverNumbering"] 
-    client = MongoClient() 
-    db = client.IDCs 
+    serverNumbering = request.form["serverNumbering"]
+    client = MongoClient()
+    db = client.IDCs
     serverNumbering = str(serverNumbering)
-    db.server.update( 
+
+    onCabinet = db.server.find({"Numbering":serverNumbering},{"onCabinet":1,"_id":0}) # to find the ratedPower for this particular server
+    for record in onCabinet:
+        cabinet = int(record['onCabinet'])
+        #print(cabinet)
+    if cabinet == 0:
+        status = {
+            'status':'onfalse'
+        }
+        return jsonify(status)
+
+    db.server.update(
         { "Numbering": serverNumbering },
         { "$set":
             {
@@ -294,14 +370,18 @@ def serverOffCabinet():
             }
         }
     )
-    return "success"
+    status = {
+        'status':'success'
+    }
+    return jsonify(status)
+
 
 # find possible place where this server can be put in
 @app.route('/findposition', methods=['POST'])
 def find_position():
-    serverNumbering = request.form.get("serverNumbering") 
-    client = MongoClient() 
-    db = client.IDCs 
+    serverNumbering = request.form.get("serverNumbering")
+    client = MongoClient()
+    db = client.IDCs
     candidatePlace = {}
     serverNumbering = str(serverNumbering)
     maximumPower = db.server.find({"Numbering":serverNumbering},{"ratedPower":1,"_id":0})
@@ -310,7 +390,7 @@ def find_position():
         power = int(record['ratedPower'])
     for record in maximumHeight:
         height = int(record['height'])
-    cursor = db.Cabinet.find() 
+    cursor = db.Cabinet.find()
     for record in cursor:
         cabinetNumbering = record["Numbering"]
         cabinetUnumber = record["uNumber"]
@@ -319,7 +399,7 @@ def find_position():
         initial_value = 0
         list_length = int(cabinetUnumber)
         current_usage = [ initial_value for i in range(list_length)]
-        # Possible Choices
+
         possible_choises = [ initial_value for i in range(list_length)]
         cursor = db.server.find()
         for record in cursor:
@@ -374,14 +454,14 @@ def find_position():
 @app.route('/oncabinet', methods=['POST'])
 def serverOnCabinet():
 
-    serverNumbering = request.form["serverNumbering"] 
+    serverNumbering = request.form["serverNumbering"]
     cabinetNumber = request.form["cabinetNumber"]
     startPosition = request.form["startPosition"]
     endPosition = request.form["endPosition"]
 
     client = MongoClient() #making a connection with MongoClient
     db = client.IDCs #getting a database of MongoDB
-    serverNumbering = str(serverNumbering) 
+    serverNumbering = str(serverNumbering)
     db.server.update( # to update the server state whether its on the cabinet
         { "Numbering": serverNumbering },
         { "$set":

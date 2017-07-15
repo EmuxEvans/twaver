@@ -8,27 +8,11 @@ import $ from 'jquery';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
-var URL = 'http://127.0.0.1:5000';
 
 class Ndevice extends React.Component {
 
   constructor (props){
     super(props);
-
-    this.state={
-      serverNumbering: [],
-      cabinetNumbering: [],
-      uNumbering: [],
-      height: [],
-      category: [],
-      responsible: [],
-      ratedPower: [],
-      actualPowerLoad: [],
-      actualTemperature: [],
-      thresholdTemperature: [],
-      onCabinet: [],
-      on: []
-    };
   }
 
   handleSubmit = (e) => {
@@ -36,7 +20,6 @@ class Ndevice extends React.Component {
     var dataT;
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
         dataT = values;
       }
       else {
@@ -46,54 +29,28 @@ class Ndevice extends React.Component {
 
     var data = new FormData(document.getElementById('serverInfo'));
     data.append('Numbering', dataT.Numbering);
-    data.append('cabinetnumbering', dataT.cabinetnumbering);
     data.append('ratedpower', dataT.ratedpower);
     data.append('height', dataT.height);
     data.append('category', dataT.category);
     data.append('responsible', dataT.responsible);
     data.append('thresholdtemperature', dataT.thresholdtemperature);
 
-
     fetch('http://127.0.0.1:5000/insertdevice', {
       method: 'POST',
-      mode: 'cors',
+      //mode: 'no-cors',
       header: {
         "Content-Type": 'application/json',
         'Accept': 'application/json'
       },
       body: data
     })
-    .then(function(resp) {
-      if(resp.ok) {
-        console.log("success RESP");
-      }
-    });
-
-/*
-    fetch('http://127.0.0.1:5000/search', {
-      method: 'GET',
-      mode: 'cors',
-      dataType: 'json'
-    })
     .then(resp => resp.json())
     .then(resp => {
-      this.setState({
-        serverNumbering: resp.serverNumbering,
-        cabinetNumbering: resp.cabinetNumbering,
-        uNumbering: resp.uNumbering,
-        height: resp.height,
-        category: resp.category,
-        responsible: resp.responsible,
-        ratedPower: resp.ratedPower,
-        actualPowerLoad: resp.actualPowerLoad,
-        actualTemperature: resp.actualTemperature,
-        thresholdTemperature: resp.thresholdTemperature,
-        onCabinet: resp.onCabinet,
-        on: resp.on,
-      })
-    })
-    .catch(error => console.log(error))
-*/    
+      if(resp.status == "success")
+        message.success('增加设备成功');
+      else
+        message.warning('设备编号已存在，增加失败');
+    });   
   }
 
   render() {
@@ -115,21 +72,7 @@ class Ndevice extends React.Component {
               message: 'Please input device No',
             }],
           })(
-            <Input placeholder = "请输入设备编号" />
-          )}
-        </FormItem>
-
-        <FormItem
-          {...formItemLayout}
-          label="所属机柜编号"
-        >
-          {getFieldDecorator('cabinetnumbering', { 
-            rules: [{
-              required: true,
-              message: 'Please input cabinet No',
-            }],
-          })(
-            <Input placeholder = "请输入所属机柜编号" />
+            <Input placeholder = "请输入设备编号"  />
           )}
         </FormItem>
 
