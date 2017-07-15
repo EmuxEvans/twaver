@@ -40,7 +40,7 @@ export default class OnandOff extends React.Component{
 
   componentDidMount =()=>{
     this.loadData();
-
+    setInterval(this.loadData, 20000);    
   }
 
   loadData=() =>{

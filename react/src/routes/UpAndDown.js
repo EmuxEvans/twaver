@@ -52,7 +52,7 @@ export default class NestedTable extends Component {
 
   componentDidMount() {
     this.loadData();
-
+    setInterval(this.loadData, 20000);
   }
 
   loadData =()=>{

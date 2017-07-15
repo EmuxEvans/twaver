@@ -4,7 +4,6 @@ import {
 } from 'antd';
 import PropTypes from 'prop-types';
 import styles from './InputBlock.css';
-import $ from 'jquery';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
@@ -37,7 +36,6 @@ class Ndevice extends React.Component {
 
     fetch('http://127.0.0.1:5000/insertdevice', {
       method: 'POST',
-      //mode: 'no-cors',
       header: {
         "Content-Type": 'application/json',
         'Accept': 'application/json'

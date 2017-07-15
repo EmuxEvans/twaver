@@ -42,7 +42,7 @@ export default class EditableTable extends React.Component {
 
   componentDidMount =()=>{
     this.loadData();
-    //setInterval(this.loadData, 20000);
+    setInterval(this.loadData, 20000);
   }
 
   loadData=() =>{
