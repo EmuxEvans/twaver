@@ -5,6 +5,7 @@ import Overview3D from './Overview3D';
 import createTooltip from './tooltip';
 import styles from './index.css';
 import constants from './constants';
+import * as utility from './utility';
 
 const size = constants.size;
 const picMap = constants.picMap;
@@ -1173,7 +1174,7 @@ var demo = {
         interaction.target = target;
         const position = new mono.Vec3().addVectors(offset, target);
         camera.setPosition(position);
-        console.log(target, position);
+        // console.log(target, position);
       },
     });
     animation.onDone = onDone;
@@ -1520,7 +1521,7 @@ var demo = {
     const step = height / total;
 
     const groups = demo.groupDeviceData(filterDeviceData, total);
-    // console.log(groups);
+    // console.log(groups, filterDeviceData);
 
     let isSpace = (!filterDeviceData[0] || filterDeviceData[0].uId.slice(0, 2) !== '01');
     let y = 0;
@@ -1555,7 +1556,7 @@ var demo = {
     const groups = [];
 
     if (data.length !== 0) {
-      data.forEach((element, i) => {
+      utility.sortDevice(data).forEach((element, i) => {
         const {
           positionHigh,
           positionLow,

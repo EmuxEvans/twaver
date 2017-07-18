@@ -838,7 +838,7 @@ function inbuilts() {
       new twaver.Animate({
         from: 0,
         to: fake.getHeight(),
-        dur: 2000,
+        dur: 1000,
         easing: 'easeOut',
         onUpdate: function(value) {
           fake.setHeight(value);
