@@ -5,6 +5,7 @@ import Overview3D from './Overview3D';
 import createTooltip from './tooltip';
 import styles from './index.css';
 import constants from './constants';
+import translate from '../../utils/translate';
 import * as utility from './utility';
 
 const size = constants.size;
@@ -944,10 +945,12 @@ var demo = {
   },
 
   createServer(box, cube, cut, pic, color, oldRack, data) {
+    const category = data.category;
+    const isFrame = category === '13' || category === '14'; // 是否是机框式设备
     const x = cube.getPositionX();
     const z = cube.getPositionZ();
     var width = cut.getWidth();
-    var height = picMap[pic];
+    var height = isFrame ? size * parseInt(data.height, 10) : picMap[pic];
     const depth = cut.getDepth();
 
     const serverBody = new mono.Cube(width - 2, height - 1, depth - 4);
@@ -964,7 +967,7 @@ var demo = {
     color = color || '#FFFFFF';
     serverPanel.s({
       'm.texture.image': demo.getRes('rack_inside.jpg'),
-      'front.m.texture.image': demo.getRes(pic),
+      'front.m.texture.image': isFrame ? demo.getRes('serverFrame.png') : demo.getRes(pic),
       'front.m.texture.repeat': new mono.Vec2(1, 1),
       'm.specularStrength': 100,
       'm.transparent': true,
@@ -972,7 +975,7 @@ var demo = {
       'm.ambient': color,
     });
     serverPanel.setPosition(0, 0.5, serverBody.getDepth() / 2 + (cube.getDepth() - serverBody.getDepth()) / 2);
-    if (pic == 'server7.png') {
+    if (isFrame) {
       const serverColor = '#FFFFFF';
       serverPanel.s({
         'm.color': serverColor,
@@ -988,14 +991,14 @@ var demo = {
     server.setPosition(0.5, 0, -5);
     box.add(server);
 
-    if (pic == 'server7.png') {
+    if (isFrame) {
       let isRendered = false;
       let xoffset = 2.1008,
         yoffset = 0.9897;
       var width = width + 2;
       var height = height + 1;
-      const cardWidth = (width - xoffset * 2) / 14;
       const count = 14;
+      const cardWidth = (width - xoffset * 2) / count;
 
       for (let i = 0; i < count; i++) {
         let cardColor = '#FFFFFF';
@@ -1452,7 +1455,7 @@ var demo = {
 
     const heatmap = Heatmap.create({
       container: div,
-      radius: 200,
+      radius: 180,
       maxOpacity: 0.8,
     });
 
@@ -1830,11 +1833,16 @@ var demo = {
 
   showVideoDialog(title) {
     const video = document.createElement('video');
-    video.setAttribute('src', demo.getRes('test.mp4'));
     video.setAttribute('controls', 'true');
     video.setAttribute('autoplay', 'true');
+    const flvPlayer = flvjs.createPlayer({
+      type: 'flv',
+      url: demo.getRes('test.flv')
+    });
+    flvPlayer.attachMediaElement(video);
+    flvPlayer.load();
 
-    demo.showDialog(video, title, 610, 280);
+    demo.showDialog(video, title, 380, 320);
   },
 
   showDataDialog(element) {
@@ -1882,7 +1890,7 @@ var demo = {
         table.appendChild(tr);
 
         const td1 = demo.createDomElement('td', server.Numbering);
-        const td2 = demo.createDomElement('td', `${server.category}(${parseInt(server.height, 10)}U)`);
+        const td2 = demo.createDomElement('td', `${translate(server.category)}(${parseInt(server.height, 10)}U)`);
         const td3 = demo.createDomElement('td', server.uNumbering);
 
         tr.appendChild(td1);

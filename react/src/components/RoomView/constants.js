@@ -10,7 +10,6 @@ export default {
     'server5.png': singleServerSize * 5,
     'server6.png': singleServerSize * 6,
     'server7.png': singleServerSize * 7,
-    'server8.png': singleServerSize * 8,
   },
   spaceColor: '#286090',
   solidColor: '#A4A4A4',

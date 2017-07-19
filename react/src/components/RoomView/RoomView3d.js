@@ -115,7 +115,7 @@ class RoomView3d extends Component {
         });
         demo.init(this.mainDivId, dataJson, deviceData);
       })
-      .catch(({ err }) => {
+      .catch((err) => {
         console.log(err);
         this.setState({
           loading: false,
