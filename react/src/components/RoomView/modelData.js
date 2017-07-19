@@ -240,6 +240,7 @@ const dataJson = {
     from: [-80, 480],
     to: [-80, -480],
   }],
+  temperatureUpperLimit: 90,
   temperatureData: [{
     x: 180,
     y: 200,

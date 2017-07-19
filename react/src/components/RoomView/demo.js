@@ -1431,7 +1431,7 @@ var demo = {
       'top.m.visible': true,
       'top.m.transparent': true,
       'top.m.opacity': 1,
-      'top.m.texture.image': demo.createTemperatureWallImage(width, depth, demo.dataJson.temperatureData),
+      'top.m.texture.image': demo.createTemperatureWallImage(width, depth, demo.temperatureData, demo.temperatureUpperLimit),
       'm.side': mono.DoubleSide,
       'm.type': 'phong',
     });
@@ -1442,7 +1442,7 @@ var demo = {
     box.temperatureWall = cube;
   },
 
-  createTemperatureWallImage(width, height, data) {
+  createTemperatureWallImage(width, height, data, upperLimit) {
     const div = document.createElement('div');
     demo.htmlElement.appendChild(div);
     div.style.display = 'none';
@@ -1456,10 +1456,19 @@ var demo = {
       maxOpacity: 0.8,
     });
 
+    // 修正坐标，使热力图上的点坐标和机柜坐标相符
+    const fixedData = data.map((element) => {
+      const obj = {};
+      obj.value = element.value;
+      obj.x = width / 2 + element.x;
+      obj.y = height / 2 - element.y;
+      return obj;
+    })
+
     heatmap.setData({
-      max: 90,
+      max: upperLimit || 90,
       min: 0,
-      data,
+      data: fixedData,
     });
 
     const src = heatmap.getDataURL();
@@ -1556,7 +1565,7 @@ var demo = {
     const groups = [];
 
     if (data.length !== 0) {
-      utility.sortDevice(data).forEach((element, i) => {
+      utility.sortByAttr(data, 'uId').forEach((element, i) => {
         const {
           positionHigh,
           positionLow,
@@ -1626,7 +1635,7 @@ var demo = {
             const rackId = element.getClient('id');
             const filterDeviceData = demo.deviceData.filter(e => e.parentId === rackId && e.on !== '0');
             const usedPower = filterDeviceData.reduce((preValue, currValue) => {
-              return preValue += currValue.power;
+              return preValue + currValue.power;
             }, 0);
 
             const usage = usedPower / totalPower;

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Spin } from 'antd';
 
+import * as utility from './utility';
 import { getAllCabinet, getAllDevice } from '../../services/app';
 import dataJson from './modelData';
 import demo from './demo';
@@ -23,16 +24,28 @@ function setDeviceData(response, deviceData) {
 }
 
 function setRackData(response) {
-  demo.cabinet = handleData(response);
+  demo.cabinet = utility.sortByAttr(handleData(response), 'Numbering');
   const racks = dataJson.objects.find(e => e.type === 'racks');
   racks.clients = [];
+  demo.temperatureData = [];
+  demo.temperatureUpperLimit = 0;
+
   demo.cabinet.forEach((e, i) => {
     const client = {};
     client.id = e.Numbering;
     client.totalU = e.uNumber;
     client.totalPower = e.thresholdPowerLoad;
     racks.clients.push(client);
+
+    const temperature = {};
+    temperature.value = parseInt(e.actualTemperature, 10);
+    temperature.x = racks.translates[i][0];
+    temperature.y = racks.translates[i][2];
+    demo.temperatureData.push(temperature);
+    demo.temperatureUpperLimit += parseInt(e.thresholdCoolingLoad, 10);
   });
+
+  demo.temperatureUpperLimit /= demo.cabinet.length;
 
   dataJson.objects.splice(dataJson.objects.findIndex(e => e.type === 'racks'), 1, racks);
 }
