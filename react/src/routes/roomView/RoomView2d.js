@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import styles from './index.css';
 
-import room2d from '../../assets/room2D.png';
+import room2d from '../../assets/room2D.min.png';
 
 function RoomView2d() {
   return (

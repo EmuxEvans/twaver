@@ -947,6 +947,7 @@ var demo = {
   createServer(box, cube, cut, pic, color, oldRack, data) {
     const category = data.category;
     const isFrame = category === '13' || category === '14'; // 是否是机框式设备
+    // const isFrame = pic === 'server7.png';
     const x = cube.getPositionX();
     const z = cube.getPositionZ();
     var width = cut.getWidth();
@@ -997,8 +998,9 @@ var demo = {
         yoffset = 0.9897;
       var width = width + 2;
       var height = height + 1;
+      const totalCount = 14;
       const count = 14;
-      const cardWidth = (width - xoffset * 2) / count;
+      const cardWidth = (width - xoffset * 2) / totalCount;
 
       for (let i = 0; i < count; i++) {
         let cardColor = '#FFFFFF';
