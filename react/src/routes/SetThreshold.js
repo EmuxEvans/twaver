@@ -1,8 +1,10 @@
+import React, { Component } from 'react';
 import { Table, Input, Popconfirm, message } from 'antd';
-const urlgetcabinet = "http://127.0.0.1:5000/getallcabinet";
-const urlsetthreshold = "http://127.0.0.1:5000/setthresholdvalue";
+import * as fetchCabinet from '../services/cabinet';
+const urlgetcabinet = 'http://127.0.0.1:5000/getallcabinet';
+const urlsetthreshold = 'http://127.0.0.1:5000/setthresholdvalue';
 
-class EditableCell extends React.Component {
+class EditableCell extends Component {
   state = {
     value: this.props.value,
     editable: this.props.editable || false,
@@ -27,7 +29,7 @@ class EditableCell extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return nextProps.editable !== this.state.editable ||
-           nextState.value !== this.state.value;
+      nextState.value !== this.state.value;
   }
 
   handleChange(e) {
@@ -57,7 +59,7 @@ class EditableCell extends React.Component {
   }
 }
 
-export default class EditableTable extends React.Component {
+export default class EditableTable extends Component {
   constructor(props) {
     super(props);
     this.columns = [{
@@ -100,37 +102,32 @@ export default class EditableTable extends React.Component {
     };
   }
 
-  componentDidMount =()=>{
+  componentDidMount() {
     this.loadData();
-    setInterval(this.loadData, 20000);    
   }
 
-  loadData=() =>{
-    fetch(urlgetcabinet, {
-      method: 'GET',
-      mode: 'cors',
-    })
-    .then(resp => resp.json())
-    .then((resp) => {
-        const data=[];
-        for (var i in resp) {     
-          var temp = new Object();  
-          temp["key"] = resp[i].cabinetNumbering;
-          temp["cabinetNo"] = {
-            value:resp[i].cabinetNumbering
+  loadData = () => {
+    fetchCabinet.getAllCabinet()
+      .then((resp) => {
+        const data = [];
+        for (const i in resp) {
+          const temp = {};
+          temp.key = resp[i].cabinetNumbering;
+          temp.cabinetNo = {
+            value: resp[i].cabinetNumbering,
           };
-          temp["threshold"] = {
-            value:resp[i].thresholdPowerLoad, 
-            editable:false
+          temp.threshold = {
+            value: resp[i].thresholdPowerLoad,
+            editable: false,
           };
-          data.push(temp);        
+          data.push(temp);
         }
 
         this.setState({
-          data:data
+          data,
         });
-    })
-    .catch(error => console.log(error))
+      })
+      .catch(error => console.log(error));
   }
 
   renderColumns(data, index, key, text) {
@@ -159,7 +156,7 @@ export default class EditableTable extends React.Component {
 
   editDone(numbering, index, type) {
     const { data } = this.state;
-    var thresholdPower = 0;
+    let thresholdPower = 0;
     Object.keys(data[index]).forEach((item) => {
       if (data[index][item] && typeof data[index][item].editable !== 'undefined') {
         data[index][item].editable = false;
@@ -172,30 +169,21 @@ export default class EditableTable extends React.Component {
           delete data[index][item].status;
           thresholdPower = data[index].threshold.value;
         }
-      }); 
+      });
 
-      var formdata = new FormData();
+      const formdata = new FormData();
       formdata.append('cabinetNumbering', numbering);
       formdata.append('thresholdPower', thresholdPower);
 
-      fetch(urlsetthreshold, {
-        method: 'POST',
-        mode: 'cors',
-        header: {
-          "Content-Type": 'application/json',
-          "Accept": 'application/json'
-        },
-        body: formdata
-      })
-      .then(resp => resp.json())
-      .then(resp => {
-        if(resp.status == "success")
-          message.success('阈值已修改');
-      })
-      .catch(error => {
-        console.log(error);
-        message.warning('修改失败');
-      });
+      fetchCabinet.setThreshold(formdata)
+        .then((resp) => {
+          if (resp.status === 'success') {
+            message.success('阈值已修改');
+          }
+        })
+        .catch(() => {
+          message.warning('修改失败');
+        });
     });
   }
 

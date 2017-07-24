@@ -116,13 +116,13 @@ class RoomView3d extends Component {
       loading: true,
     });
     return getAllDevice()
-      .then(({ data: res }) => {
+      .then((res) => {
         setDeviceData(res, deviceData);
       })
       .then(() => {
         return getAllCabinet();
       })
-      .then(({ data: res }) => {
+      .then((res) => {
         setRackData(res);
         demo.filterRack = Object.keys(res);
       })

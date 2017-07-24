@@ -1,8 +1,9 @@
+import React, { Component } from 'react';
 import { Table, Input, Icon, Button, Popconfirm, message } from 'antd';
-const urlsendindex = 'http://127.0.0.1:5000/deletedevice';
-const urlgetdata = 'http://127.0.0.1:5000/getalldevice';
+import * as fetchDevice from '../services/device';
+import translate from '../utils/translate';
 
-export default class EditableTable extends React.Component {
+export default class EditableTable extends Component {
   constructor(props) {
     super(props);
     this.columns = [{
@@ -23,14 +24,14 @@ export default class EditableTable extends React.Component {
     }, {
       title: '操作',
       dataIndex: 'operation',
-      render: (text, record, index) => {
+      render: (text, record) => {
         return (
           this.state.dataSource.length > 1 ?
-          (
-            <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.deviceNo)}>
-              <a href="#">删除</a>
-            </Popconfirm>
-          ) : null
+            (
+              <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.deviceNo)}>
+                <a href="#">删除</a>
+              </Popconfirm>
+            ) : null
         );
       },
     }];
@@ -40,98 +41,48 @@ export default class EditableTable extends React.Component {
     };
   }
 
-  componentDidMount =()=>{
+  componentDidMount() {
     this.loadData();
-    setInterval(this.loadData, 20000);
   }
 
-  loadData=() =>{
-    fetch(urlgetdata, {
-      method: 'GET',
-      mode: 'cors',
-    })
-    .then(resp => resp.json())
-    .then((resp) => {
-        const data=[];
-        for (var i in resp) {     
-          var temp = new Object();  
-          temp["key"]= resp[i].Numbering;
-          temp["deviceNo"]=resp[i].Numbering;
-          if(resp[i].cabinetNumbering == '-1')
-            temp["cabinetNo"] = "该设备未上柜";
-          else
-            temp["cabinetNo"] = resp[i].cabinetNumbering;
-          temp["ratedPower"]=resp[i].ratedPower;
-          switch(resp[i].category) {
-            case "11": {
-              temp["deviceType"]="机架式服务器";
-              break;
-            }
-            case "12": {
-              temp["deviceType"]="机架式服务器";
-              break;
-            }
-            case "15": {
-              temp["deviceType"]="机架式存储设备";
-              break;
-            }
-            case "16": {
-              temp["deviceType"]="小型机";
-              break;
-            }
-            case "17": {
-              temp["deviceType"]="网络交换机";
-              break;
-            }
-            case "18": {
-              temp["deviceType"]="路由器";
-              break;
-            }
-            case "19": {
-              temp["deviceType"]="其他网络设备";
-              break;
-            }                                                                        
+  loadData = () => {
+    fetchDevice.getAllDevice()
+      .then((resp) => {
+        const data = [];
+        for (const i in resp) {
+          const temp = {};
+          temp.key = resp[i].Numbering;
+          temp.deviceNo = resp[i].Numbering;
+          if (resp[i].cabinetNumbering === '-1') {
+            temp.cabinetNo = '该设备未上柜';
+          } else {
+            temp.cabinetNo = resp[i].cabinetNumbering;
           }
-          
-          temp["responsible"]=resp[i].responsible;
-          data.push(temp);        
+          temp.ratedPower = resp[i].ratedPower;
+          temp.deviceType = translate(resp[i].category);
+
+          temp.responsible = resp[i].responsible;
+          data.push(temp);
         }
 
         this.setState({
-          dataSource:data
+          dataSource: data,
         });
-    })
-    .catch(error => console.log(error))
+      })
+      .catch(error => console.log(error));
   }
 
   onDelete = (index) => {
-    const dataSource = [...this.state.dataSource];
-    dataSource.splice(index, 1);
-
-    var data = new FormData();
-    data.append('deviceNo', index);
-    fetch(urlsendindex, {
-      method: 'POST',
-      mode: 'cors',
-      header: {
-        "Content-Type": 'application/json',
-        "Accept": 'application/json'
-      },
-      body: data
-    })
-    .then(resp => resp.json())
-    .then(resp => {
-      if(resp.status == "success") {
-        message.success('成功删除设备');
-        this.loadData();
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      message.warning('删除失败');
-    });
-
-    this.setState({ dataSource });
+    fetchDevice.deleteDevice({ deviceNo: index })
+      .then((resp) => {
+        if (resp.status === 'success') {
+          message.success('成功删除设备');
+          this.loadData();
+        }
+      })
+      .catch(() => {
+        message.warning('删除失败');
+      });
   }
 
   render() {

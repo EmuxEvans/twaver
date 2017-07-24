@@ -1,9 +1,8 @@
-import request from '../utils/request';
+import { getAllDevice } from './device';
+import { getAllCabinet } from './cabinet';
 
-export async function getAllDevice() {
-  return request('/getalldevice');
-}
+export {
+  getAllDevice,
+  getAllCabinet,
+};
 
-export async function getAllCabinet() {
-  return request('/getallcabinet');
-}

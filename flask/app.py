@@ -140,7 +140,8 @@ def insertModule():
 #return 'success' when succeed
 @app.route('/deletedevice', methods=['POST'])
 def deleteServer():
-    serverNumbering = request.form.get("deviceNo")
+    # serverNumbering = request.form.get("deviceNo")
+    serverNumbering = request.get_json()['deviceNo']
     num = str(serverNumbering)
     client = MongoClient()
     db = client.IDCs
@@ -157,8 +158,6 @@ def deleteServer():
 def setthreshold():
     cabinetNumbering = request.form.get("cabinetNumbering")
     thresholdPower = request.form.get("thresholdPower")
-    print cabinetNumbering
-    print thresholdPower
     num = str(cabinetNumbering)
     client = MongoClient()
     db = client.IDCs
@@ -239,9 +238,9 @@ def searchCabinet():
 #return 'success' when succeed
 @app.route('/onandoff', methods=['POST'])
 def serverOn():
-
-    serverNumbering = request.form["serverNumbering"] 
-    serviceNumber = request.form["serviceNumber"]
+    data = request.get_json()
+    serverNumbering = data["serverNumbering"] 
+    serviceNumber = data["serviceNumber"]
 
     client = MongoClient()
     db = client.IDCs 
@@ -275,19 +274,19 @@ def serverOn():
         for record in cabinetThresholdPower:
             ThresholdPower = record['thresholdPowerLoad']
 
-        powercabinet = db.Cabinet.find({"Numbering":CabinetNumber},{"NumberingPowerCabinet":1,"_id":0}) # to find the actual power and threshold power of this cabinet
-        for record in powercabinet:
-            powerCabinetNumber = record['NumberingPowerCabinet']
+        # powercabinet = db.Cabinet.find({"Numbering":CabinetNumber},{"NumberingPowerCabinet":1,"_id":0}) # to find the actual power and threshold power of this cabinet
+        # for record in powercabinet:
+            # powerCabinetNumber = record['NumberingPowerCabinet']
 
-        powerCabinetThresholdPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"thresholdPowerLoad":1,"_id":0})
-        for record in powerCabinetThresholdPower:
-            CabinetThresholdPower = record['thresholdPowerLoad']
+        # powerCabinetThresholdPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"thresholdPowerLoad":1,"_id":0})
+        # for record in powerCabinetThresholdPower:
+            # CabinetThresholdPower = record['thresholdPowerLoad']
 
-        powerCabinetActualPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"actualTotalPowerLoad":1,"_id":0})
-        for record in powerCabinetActualPower:
-            CabinetActualPower = record['actualTotalPowerLoad']
+        # powerCabinetActualPower = db.powerCabinet.find({"Numbering":powerCabinetNumber},{"actualTotalPowerLoad":1,"_id":0})
+        # for record in powerCabinetActualPower:
+            # CabinetActualPower = record['actualTotalPowerLoad']
 
-        if (power+ActualPower) > ThresholdPower or (power+CabinetActualPower) > CabinetThresholdPower:
+        if (power+ActualPower) > ThresholdPower:
             status = {
                 'status':'fail'
             }
@@ -373,9 +372,9 @@ def serverOffCabinet():
 
 
 # find possible place where this server can be put in
-@app.route('/findposition', methods=['POST'])
+@app.route('/findposition', methods=['GET'])
 def find_position():
-    serverNumbering = request.form.get("serverNumbering")
+    serverNumbering = request.args.get("serverNumbering")
     client = MongoClient()
     db = client.IDCs
     serverNumbering = str(serverNumbering)
