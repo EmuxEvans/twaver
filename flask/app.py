@@ -378,7 +378,6 @@ def find_position():
     serverNumbering = request.form.get("serverNumbering")
     client = MongoClient()
     db = client.IDCs
-    candidatePlace = {}
     serverNumbering = str(serverNumbering)
     maximumPower = db.server.find({"Numbering":serverNumbering},{"ratedPower":1,"_id":0})
     maximumHeight = db.server.find({"Numbering":serverNumbering},{"height":1,"_id":0})
@@ -386,6 +385,28 @@ def find_position():
         power = int(record['ratedPower'])
     for record in maximumHeight:
         height = int(record['height'])
+
+    candidatePlace = find_candidate_place(power, height)
+    jsonStr = json.dumps(candidatePlace)
+    return jsonStr
+
+@app.route('/find_position_by_power_height', methods=['GET'])
+def find_position_by_power_height():
+    power = request.args.get('power')
+    height = request.args.get('height')
+    if power:
+        power = int(power)
+    if height:
+        height = int(height)
+
+    candidatePlace = find_candidate_place(power, height)
+    jsonStr = json.dumps(candidatePlace)
+    return jsonStr
+
+def find_candidate_place(power, height):
+    candidatePlace = {}
+    client = MongoClient()
+    db = client.IDCs
     cursor = db.Cabinet.find()
     for record in cursor:
         cabinetNumbering = record["Numbering"]
@@ -440,8 +461,7 @@ def find_position():
                     "endPosition" : str(endPos)
                 }
                 break
-    jsonStr = json.dumps(candidatePlace)
-    return jsonStr
+    return candidatePlace
 
 # to set the server on the cabinet
 @app.route('/oncabinet', methods=['POST'])

@@ -50,6 +50,8 @@ var demo = {
   // all registered shadow painters.
   _shadowPainters: {},
 
+  filterRack: [],
+
   resetData() {
     demo._creators = {};
     demo._filters = {};
@@ -98,6 +100,7 @@ var demo = {
     demo.htmlElement = document.getElementById(htmlElementId);
 
     const network = window.network = new mono.Network3D();
+    demo.network = network;
     const box = network.getDataBox();
     demo.typeFinder = new mono.QuickFinder(box, 'type', 'client');
     demo.labelFinder = new mono.QuickFinder(box, 'label', 'client');
@@ -336,6 +339,7 @@ var demo = {
       const rack = idFinder.findFirst(element.Numbering);
       rack.realTimeData = element;
     });
+    return idFinder;
   },
 
   resetCamera(network) {
@@ -1508,7 +1512,7 @@ var demo = {
 
       if (type === 'rack' || type === 'rack.door') {
         element.setVisible(!network.spaceView);
-        if (type === 'rack') {
+        if (type === 'rack' && demo.filterRack.includes(element.getClient('id'))) {
           if (!element.spaceCubes) {
             element.spaceCubes = demo.createRackSpaceCubes(network.getDataBox(), element);
           }

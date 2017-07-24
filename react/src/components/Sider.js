@@ -20,21 +20,22 @@ class Nsider extends React.Component {
     const pathname = this.props.location.pathname;
     return (
       <div>
-        <Switch onChange={this.changeMode} />
+        {/* <Switch onChange={this.changeMode} /> */}
         <Menu
           style={{ width: 240 }}
           selectedKeys={[pathname]}
+          defaultOpenKeys={['sub1', 'sub2', 'sub3', 'sub4']}
           mode={this.state.mode}
         >
           <SubMenu key="sub1" title={<span><Icon type="environment-o" /><span>机房视图</span></span>}>
             <Menu.Item key="/roomView3d"><Link to="/roomView3d">3D机房视图</Link></Menu.Item>
-            <Menu.Item key="/roomView2d"><Link to="/roomView2d">2D机房视图</Link></Menu.Item>
+            {/* <Menu.Item key="/roomView2d"><Link to="/roomView2d">2D机房视图</Link></Menu.Item> */}
           </SubMenu>
           <SubMenu key="sub2" title={<span><Icon type="mail" /><span>主设备管理</span></span>}>
             <MenuItemGroup title="增加主设备">
               <Menu.Item key="/serverdevice"><Link to="/serverdevice">增加设备</Link></Menu.Item>
-              <Menu.Item key="/serverframe"><Link to="/serverframe">增加机框</Link></Menu.Item>
-              <Menu.Item key="/servermodule"><Link to="/servermodule">增加模块</Link></Menu.Item>
+              {/* <Menu.Item key="/serverframe"><Link to="/serverframe">增加机框</Link></Menu.Item> */}
+              {/* <Menu.Item key="/servermodule"><Link to="/servermodule">增加模块</Link></Menu.Item> */}
             </MenuItemGroup>
             <MenuItemGroup title="删除主设备">
               <Menu.Item key="/deldevice"><Link to="/deldevice">删除主设备</Link></Menu.Item>

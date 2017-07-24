@@ -62,3 +62,12 @@ table.gridtable td {
   border-color: #666666;
   background-color: rgba(255, 255, 255, 0.6);
 }
+
+.room_search {
+  padding: 15px 20px;
+}
+
+.room_select {
+  width: 120px;
+  margin-right: 20px;
+}

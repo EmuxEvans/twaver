@@ -9,13 +9,13 @@ function RouterConfig({ history }) {
 
         <IndexRedirect to="/roomView3d" />
         <Route path="/serverdevice" component={require('./routes/InputServerDevice.js')} />
-        <Route path="/serverframe" component={require('./routes/InputServerFrame.js')} />
-        <Route path="/servermodule" component={require('./routes/InputServerModule.js')} />
+        {/* <Route path="/serverframe" component={require('./routes/InputServerFrame.js')} /> */}
+        {/* <Route path="/servermodule" component={require('./routes/InputServerModule.js')} /> */}
         <Route path="/deldevice" component={require('./routes/DeleteServer.js')} />
         <Route path="/onandoff" component={require('./routes/OnAndOff.js')} />
         <Route path="/upanddown" component={require('./routes/UpAndDown.js')} />
         <Route path="/threshold" component={require('./routes/SetThreshold.js')} />
-        <Route path="/roomView2d" component={require('./routes/roomView/RoomView2d.js')} />
+        {/* <Route path="/roomView2d" component={require('./routes/roomView/RoomView2d.js')} /> */}
         <Route path="/roomView3d" component={require('./routes/roomView/RoomView3d.js')} />
 
       </Route>

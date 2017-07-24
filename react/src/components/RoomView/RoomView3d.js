@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
-import { Spin } from 'antd';
+import { Spin, Button, InputNumber } from 'antd';
+import _ from 'lodash';
 
+import constants from '../../constants';
 import * as utility from './utility';
 import { getAllCabinet, getAllDevice } from '../../services/app';
 import dataJson from './modelData';
 import demo from './demo';
+import styles from './index.css';
+
+const URL = constants.url;
 
 function setDeviceData(response, deviceData) {
   demo.serverRealTimeData = handleDeviceData(response);
@@ -90,16 +95,27 @@ class RoomView3d extends Component {
     super(props);
     this.state = {
       loading: false,
+      isInit: false,
+      power: 0,
+      height: 0,
     };
     this.mainDivId = 'room-view-3d';
   }
 
   componentDidMount() {
+    this.getDataInitDemo();
+  }
+
+  componentWillUnmount() {
+    document.getElementById(this.mainDivId).remove();
+  }
+
+  getDataInitDemo() {
     const deviceData = [];
     this.setState({
       loading: true,
     });
-    getAllDevice()
+    return getAllDevice()
       .then(({ data: res }) => {
         setDeviceData(res, deviceData);
       })
@@ -108,10 +124,12 @@ class RoomView3d extends Component {
       })
       .then(({ data: res }) => {
         setRackData(res);
+        demo.filterRack = Object.keys(res);
       })
       .then(() => {
         this.setState({
           loading: false,
+          isInit: true,
         });
         demo.init(this.mainDivId, dataJson, deviceData);
       })
@@ -123,13 +141,68 @@ class RoomView3d extends Component {
       });
   }
 
-  componentWillUnmount() {
-    document.getElementById(this.mainDivId).remove();
+  handlePowerChange = (value) => {
+    this.setState({
+      power: value,
+    });
+  }
+
+  handleHeightChange = (value) => {
+    this.setState({
+      height: value,
+    });
+  }
+
+  searchPosition = () => {
+    if (this.state.isInit) {
+      fetch(`${URL}/find_position_by_power_height?power=${this.state.power}&&height=${this.state.height}`, {
+        method: 'get',
+      })
+        .then(res => res.json())
+        .then((res) => {
+          demo.resetView(demo.network);
+          demo.filterRack = Object.keys(res);
+          demo.toggleSpaceView(demo.network);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }
+
+  formatter = (value) => {
+    return `${_.toInteger(value)}`;
+  }
+
+  parser = (value) => {
+    return _.toInteger(value);
   }
 
   render() {
     return (
       <div>
+        <div className={styles.room_search}>
+          功率（W）：
+          <InputNumber
+            className={styles.room_select}
+            defaultValue={1}
+            min={1}
+            formatter={this.formatter}
+            parser={this.parser}
+            onChange={this.handlePowerChange}
+          />
+          高度（U）：
+          <InputNumber
+            className={styles.room_select}
+            defaultValue={1}
+            min={1}
+            max={42}
+            formatter={this.formatter}
+            parser={this.parser}
+            onChange={this.handleHeightChange}
+          />
+          <Button onClick={this.searchPosition}>查询空位</Button>
+        </div>
         <Spin spinning={this.state.loading} delay={300} size="large">
           <div id={this.mainDivId} style={{ width: 1000, height: 600, position: 'relative' }} />
         </Spin>
