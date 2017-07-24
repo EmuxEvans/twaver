@@ -69,6 +69,7 @@ export default class OnandOff extends Component {
             temp.onCabinet = '已上柜';
           } else {
             temp.onCabinet = '未上柜';
+            temp.cabinetNumbering = '未上柜';
           }
           data.push(temp);
         }

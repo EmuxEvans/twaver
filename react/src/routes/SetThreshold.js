@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { Table, Input, Popconfirm, message } from 'antd';
 import * as fetchCabinet from '../services/cabinet';
-const urlgetcabinet = 'http://127.0.0.1:5000/getallcabinet';
-const urlsetthreshold = 'http://127.0.0.1:5000/setthresholdvalue';
 
 class EditableCell extends Component {
   state = {

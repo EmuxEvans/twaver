@@ -4,6 +4,7 @@ import {
   Slider, Button, Upload, Icon, message, Input,
 } from 'antd';
 import PropTypes from 'prop-types';
+import styles from '../index.css';
 import * as fetchDevice from '../services/device';
 
 const FormItem = Form.Item;
@@ -46,7 +47,7 @@ class Ndevice extends Component {
       wrapperCol: { span: 14 },
     };
     return (
-      <div>
+      <div className={styles.pt_20}>
         <Form id="serverInfo" onSubmit={this.handleSubmit}>
           <FormItem
             {...formItemLayout}
@@ -55,7 +56,7 @@ class Ndevice extends Component {
             {getFieldDecorator('Numbering', {
               rules: [{
                 required: true,
-                message: 'Please input device No',
+                message: '请输入设备编号',
               }],
             })(
               <Input placeholder="请输入设备编号" />,
@@ -69,7 +70,7 @@ class Ndevice extends Component {
             {getFieldDecorator('height', {
               rules: [{
                 required: true,
-                message: 'Please input device height',
+                message: '请输入设备高度',
               }],
             })(
               <Input placeholder="请输入设备高度" />,
@@ -83,7 +84,7 @@ class Ndevice extends Component {
           >
             {getFieldDecorator('category', {
               rules: [
-                { required: true, message: 'Please select device type!' },
+                { required: true, message: '请选择设备类型' },
               ],
             })(
               <Select placeholder="请选择设备类型">
@@ -131,7 +132,7 @@ class Ndevice extends Component {
             {getFieldDecorator('responsible', {
               rules: [{
                 required: true,
-                message: 'Please input officer',
+                message: '请输入责任人',
               }],
             })(
               <Input placeholder="请输入责任人" />,

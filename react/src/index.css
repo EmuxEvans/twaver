@@ -7,6 +7,10 @@ html, body, :global(#root) {
   margin-right: 20px;
 }
 
+.pt_20 {
+  padding-top: 20px;
+}
+
 .pt_50 {
   padding-top: 50px;
 }
