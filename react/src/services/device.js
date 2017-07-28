@@ -48,3 +48,10 @@ export async function onAndOff(body) {
     body: JSON.stringify(body),
   });
 }
+
+export async function reviewOnCabinet(body) {
+  return request('/review_on_cabinet', {
+    method: 'post',
+    body,
+  });
+}

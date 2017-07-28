@@ -1638,7 +1638,7 @@ var demo = {
 
       if (type === 'rack' || type === 'rack.door') {
         element.setVisible(!network.usageView);
-        if (type === 'rack') {
+        if (type === 'rack' && demo.filterRack.includes(element.getClient('id'))) {
           if (!element.usageFakeTotal) {
             const totalPower = parseInt(element.getClient('totalPower'), 10);
             const rackId = element.getClient('id');

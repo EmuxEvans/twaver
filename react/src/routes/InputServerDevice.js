@@ -4,7 +4,7 @@ import {
   Slider, Button, Upload, Icon, message, Input,
 } from 'antd';
 import PropTypes from 'prop-types';
-import styles from '../index.css';
+import styles from '../index.less';
 import * as fetchDevice from '../services/device';
 
 const FormItem = Form.Item;

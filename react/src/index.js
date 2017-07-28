@@ -1,10 +1,10 @@
 import dva from 'dva';
-import './index.css';
-import { browserHistory } from 'dva/router';
+import './index.less';
+import { hashHistory } from 'dva/router';
 
 // 1. Initialize
 const app = dva({
-  history: browserHistory,
+  history: hashHistory,
 });
 /*
 const app = dva({
