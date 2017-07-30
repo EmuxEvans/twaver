@@ -93,24 +93,11 @@ export default class NestedTable extends Component {
       });
   }
 
-  offCabinet = (numbering, onCabinet) => {
+  postReview = (status, numbering, on) => {
     const body = new FormData();
-    body.append('status', 'no');
-    body.append('onCabinet', onCabinet);
+    body.append('status', status);
+    body.append('on', on);
     body.append('serverNumbering', numbering);
-
-    this.postReview(body);
-  }
-
-  onCabinet = (numbering, onCabinet) => {
-    const body = new FormData();
-    body.append('status', 'ship');
-    body.append('onCabinet', onCabinet);
-    body.append('serverNumbering', numbering);
-    this.postReview(body);
-  }
-
-  postReview(body) {
     fetchDevice.reviewOnCabinet(body)
       .then((res) => {
         if (res.status === 'success') {
@@ -189,9 +176,9 @@ export default class NestedTable extends Component {
         render: (text, record) => {
           return (
             <span>
-              <a onClick={() => this.onCabinet(record.Numbering, record.onCabinet)}>通过</a>
+              <a onClick={() => this.postReview('ship', record.Numbering, record.onCabinet)}>通过</a>
               <span className="ant-divider" />
-              <a onClick={() => this.offCabinet(record.Numbering, record.onCabinet)}>不通过</a>
+              <a onClick={() => this.postReview('no', record.Numbering, record.onCabinet)}>不通过</a>
             </span>
           );
         },

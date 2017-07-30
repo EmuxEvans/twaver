@@ -4,6 +4,7 @@ import utility from '../utils/utility';
 import * as fetchDevice from '../services/device';
 import styles from '../index.less';
 import constants from '../constants';
+import ApplyOnOrOff from '../components/ApplyOnOrOff';
 
 const allAuth = constants.auth;
 
@@ -21,11 +22,16 @@ export default class OnandOff extends Component {
       { title: '实际温度', dataIndex: 'actualTemperature', key: '5', width: 100 },
       { title: '实际功率', dataIndex: 'actualPowerLoad', key: '6', width: 100 },
       { title: '负责人', dataIndex: 'responsible', key: '9', width: 100 },
-      { title: '上柜/下柜', dataIndex: 'onCabinet', key: '8', width: 100 },
-      { title: '上电/下电', dataIndex: 'on', key: '7', width: 100, fixed: 'right' }];
+      { title: '上柜/下柜', dataIndex: 'onCabinetInfo', key: '8', width: 100 },
+      { title: '上电/下电', dataIndex: 'onInfo', key: '7', width: 100, fixed: 'right' }];
 
     this.state = {
-      dataSource: [],
+      data: [],
+      onData: [],
+      offData: [],
+      reviewingData: [],
+      subData: [],
+      show: false,
     };
   }
 
@@ -37,82 +43,61 @@ export default class OnandOff extends Component {
     fetchDevice.getAllDevice()
       .then((resp) => {
         const data = [];
+        const onData = [];
+        const offData = [];
+        const reviewingData = [];
         for (const i in resp) {
           const temp = { ...resp[i] };
           temp.key = resp[i].Numbering;
           temp.category = utility.translate(resp[i].category);
 
-          temp.on = utility.translate(resp[i].on, 'on')
-          temp.onCabinet = utility.translate(resp[i].onCabinet, 'onCabinet');
-
-          if (resp[i].onCabinet !== '1') {
+          temp.onCabinetInfo = utility.translate(resp[i].onCabinet, 'onCabinet');
+          if (resp[i].onCabinet === '0') {
             temp.cabinetNumbering = utility.translate(resp[i].onCabinet, 'onCabinet');
+          }
+
+          const on = resp[i].on;
+          temp.onInfo = utility.translate(on, 'on');
+
+          if (on === '1') {
+            onData.push(temp);
+          } else if (on === '0') {
+            offData.push(temp);
+          } else {
+            reviewingData.push(temp);
           }
 
           data.push(temp);
         }
 
         this.setState({
-          dataSource: data,
+          data,
+          onData,
+          offData,
+          reviewingData,
         });
       })
       .catch(error => console.log(error));
   }
 
-  turnOn = (numbering) => {
-    const dataSource = [...this.state.dataSource];
-
-    const data = {
-      serverNumbering: numbering,
-      serviceNumber: 1,
-    };
-
-    fetchDevice.onAndOff(data)
-      .then((resp) => {
-        if (resp.status === 'success') {
-          message.success('上电成功');
-          Object.keys(dataSource).forEach((key) => {
-            if (dataSource[key].Numbering === numbering) {
-              dataSource[key].on = '已上电';
-            }
-          });
-          this.setState({ dataSource });
-        }
-        if (resp.status === 'fail') {
-          message.warning('超过机柜阈值，无法上电');
-        }
-        if (resp.status === 'onfalse') {
-          message.warning('该设备未上柜，无法上电');
+  postReview = (status, numbering, on) => {
+    const body = new FormData();
+    body.append('status', status);
+    body.append('on', on);
+    body.append('serverNumbering', numbering);
+    fetchDevice.reviewOn(body)
+      .then((res) => {
+        if (res.status === 'success') {
+          message.success('操作成功');
+          this.loadData();
         }
       });
   }
 
-  turnOff = (numbering) => {
-    const dataSource = [...this.state.dataSource];
-
-    const data = {
-      serverNumbering: numbering,
-      serviceNumber: 2,
-    };
-
-    fetchDevice.onAndOff(data)
-      .then((resp) => {
-        if (resp.status === 'success') {
-          message.success('下电成功');
-          Object.keys(dataSource).forEach((key) => {
-            if (dataSource[key].Numbering === numbering) {
-              dataSource[key].on = '未上电';
-            }
-          });
-          this.setState({ dataSource });
-        }
-        if (resp.status === 'onCabinetfalse') {
-          message.warning('该设备未上柜，无法下电');
-        }
-        if (resp.status === 'onfalse') {
-          message.warning('该设备未上电，无法下电');
-        }
-      });
+  toggleApply = () => {
+    this.setState({
+      show: !this.state.show,
+    });
   }
 
   renderApplyButton() {
@@ -120,7 +105,7 @@ export default class OnandOff extends Component {
     if (allAuth.applicant.includes(auth)) {
       return (
         <div className={`${styles.pt_20} ${styles.pb_20}`}>
-          <Button type="primary">上/下电申请</Button>
+          <Button type="primary" onClick={this.toggleApply}>上/下电申请</Button>
         </div>
       );
     }
@@ -128,7 +113,8 @@ export default class OnandOff extends Component {
 
 
   render() {
-    const { dataSource } = this.state;
+    const { data, onData, offData, reviewingData, show } = this.state;
+    let dataSource = data;
     const columns = JSON.parse(JSON.stringify(this.columns));
 
     utility.checkAuth(this.props, () => {
@@ -140,16 +126,25 @@ export default class OnandOff extends Component {
         render: (text, record) => {
           return (
             <span>
-              <a onClick={() => this.turnOn(record.Numbering)}>上电</a>
+              <a onClick={() => this.postReview('ship', record.Numbering, record.on)}>通过</a>
               <span className="ant-divider" />
-              <a onClick={() => this.turnOff(record.Numbering)}>下电</a>
+              <a onClick={() => this.postReview('no', record.Numbering, record.on)}>不通过</a>
             </span>
           );
         },
       });
+      dataSource = reviewingData;
     });
     return (
       <div>
+        <ApplyOnOrOff
+          show={show}
+          onData={onData}
+          offData={offData}
+          reviewingData={reviewingData}
+          toggle={this.toggleApply}
+          refetch={this.loadData}
+        />
         {this.renderApplyButton()}
         <Table
           columns={columns}

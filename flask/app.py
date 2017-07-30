@@ -241,11 +241,11 @@ def searchCabinet():
 def serverOn():
     data = request.get_json()
     serverNumbering = data["serverNumbering"]
-    serviceNumber = data["serviceNumber"]
+    on_or_off = data["onOrOff"]
 
     client = MongoClient()
     db = client.IDCs
-    if int(serviceNumber) == 1:
+    if on_or_off == 'on':
         serverNumbering = str(serverNumbering)
 
         maximumPower = db.server.find({"Numbering": serverNumbering}, {
@@ -259,7 +259,7 @@ def serverOn():
         for record in onCabinet:
             cabinet = int(record['onCabinet'])
 
-        if cabinet == -1:
+        if cabinet == -1 or cabinet == -2:
             status = {
                 'status': 'reviewing'
             }
@@ -309,7 +309,7 @@ def serverOn():
             {"Numbering": serverNumbering},
             {"$set":
                 {
-                    "on": str(1)
+                    "on": str(-1)
                 }
              }
         )
@@ -325,7 +325,17 @@ def serverOn():
         for record in on:
             On = int(record['on'])
 
-        if On == -1:
+        if On == -1 or On == -2:
+            db.server.update(
+                {"Numbering": serverNumbering},
+                {"$set":
+                    {
+                        "actualPowerLoad": str(0),
+                        "actualTemperature": str(0),
+                        "on": str(0)
+                    }
+                }
+            )
             status = {
                 'status': 'reviewing'
             }
@@ -342,9 +352,7 @@ def serverOn():
             {"Numbering": serverNumbering},
             {"$set":
                 {
-                    "actualPowerLoad": str(0),
-                    "actualTemperature": str(0),
-                    "on": str(0)
+                    "on": str(-2)
                 }
              }
         )
@@ -372,7 +380,13 @@ def serverOffCabinet():
             {"Numbering": serverNumbering},
             {"$set":
                 {
-                    "onCabinet": str(0),
+                    "actualPowerLoad": str(0),
+                    "actualTemperature": str(0),
+                    "cabinetNumbering": str(-1),
+                    "startPosition": str(0),
+                    "endPosition": str(0),
+                    "on": str(0),
+                    "onCabinet": str(0)
                 }
             }
         )
@@ -626,20 +640,37 @@ def review_on_cabinet():
 def review_on():
     serverNumbering = request.form["serverNumbering"]
     status = request.form["status"]
-    if status == 'ship':
-        status = 1
-    else:
-        status = 0
+    on = request.form["on"]
+
+    update = {}
+    if on == '-1':
+        if status == 'ship':
+            update = {
+                "on": "1"
+            }
+        else:
+            update = {
+                "on": "0",
+                "actualPowerLoad": "0",
+                "actualTemperature": "0",
+            }
+    elif on == '-2':
+        if status == 'ship':
+            update = {
+                "on": "0",
+                "actualPowerLoad": "0",
+                "actualTemperature": "0",
+            }
+        else:
+            update = {
+                "on": "1"
+            }
     client = MongoClient()
     db = client.IDCs
     serverNumbering = str(serverNumbering)
     db.server.update(
         {"Numbering": serverNumbering},
-        {"$set":
-            {
-                "on": str(status)
-            }
-         }
+        {"$set": update}
     )
     status = {
         'status': 'success'

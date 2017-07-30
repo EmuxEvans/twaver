@@ -8,11 +8,8 @@ import indexStyles from '../index.less';
 import styles from './Apply.less';
 
 const Option = Select.Option;
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
 
-class ApplyUpOrDown extends Component {
+class ApplyOnOrOff extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,31 +20,24 @@ class ApplyUpOrDown extends Component {
     };
   }
 
-  getCandidatePlace(Numbering) {
-    fetchDevice.findPosition(Numbering)
-      .then((res) => {
-        const cabinetKeys = Object.keys(res);
-        this.setState({
-          cabinetKeys,
-          cabinets: res,
-        });
-      });
-  }
-
-  applyOnCabinet = (e) => {
+  applyOn = (e) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        const cabinets = this.state.cabinets;
-        const cabinet = cabinets[values.cabinetNumbering];
-        const body = new FormData();
-        body.append('serverNumbering', values.Numbering);
-        body.append('cabinetNumber', values.cabinetNumbering);
-        body.append('startPosition', values.startPosition);
-        body.append('endPosition', values.endPosition);
-        fetchDevice.onCabinet(body)
-          .then(() => {
-            message.success('申请已发送，等待审核');
+        const data = {
+          serverNumbering: values.Numbering,
+          onOrOff: values.applyType,
+        };
+
+        fetchDevice.onAndOff(data)
+          .then((res) => {
+            if (res.status === 'success') {
+              message.success('申请已发送，等待审核');
+            } else if (res.status === 'reviewing') {
+              return message.error('该设备正在上柜审核中，无法上电');
+            } else if (res.status === 'onfalse') {
+              return message.error('该设备未上柜，无法上电');
+            }
             this.props.toggle();
             this.props.refetch();
           });
@@ -55,21 +45,23 @@ class ApplyUpOrDown extends Component {
     });
   }
 
-  applyOffCabinet = (e) => {
+  applyOff = (e) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        const body = new FormData();
-        body.append('serverNumbering', values.Numbering);
+        const data = {
+          serverNumbering: values.Numbering,
+          onOrOff: values.applyType,
+        };
 
-        fetchDevice.offCabinet(body)
+        fetchDevice.onAndOff(data)
           .then((res) => {
             if (res.status === 'success') {
               message.success('申请已发送，等待审核');
             } else if (res.status === 'reviewing') {
               message.success('成功下柜');
             } else if (res.status === 'onfalse') {
-              message.error('该设备未上柜，无法下柜');
+              return message.error('该设备未上柜，无法下柜');
             }
             this.props.toggle();
             this.props.refetch();
@@ -88,9 +80,6 @@ class ApplyUpOrDown extends Component {
     this.setState({
       Numbering: value,
     });
-    if (this.state.applyType === 'on') {
-      this.getCandidatePlace(value);
-    }
   }
 
   selectCabinet = (value) => {
@@ -110,26 +99,8 @@ class ApplyUpOrDown extends Component {
     return options.map((option) => {
       const Numbering = option.Numbering;
       const cabinetNumbering = option.cabinetNumbering;
-      const height = option.height;
-      return <Option value={Numbering} key={Numbering}>{`${Numbering}（${applyType === 'on' ? `高度：${height}U` : `机柜：${cabinetNumbering}`}）`}</Option>;
-    });
-  }
-
-  renderCabinetOptions() {
-    const cabinets = this.state.cabinets;
-    return Object.keys(cabinets).map((cabinet) => {
-      const cabinetNumbering = cabinets[cabinet].cabinetNumbering;
-      const position = cabinets[cabinet].position.map((element) => {
-        return `${element[0]}-${element[1]}`;
-      });
-      return (
-        <Option
-          value={cabinetNumbering}
-          key={cabinetNumbering}
-        >
-          {`${cabinetNumbering}（空位：${position.join('；')}）`}
-        </Option>
-      );
+      const ratedPower = option.ratedPower;
+      return <Option value={Numbering} key={Numbering}>{`${Numbering}（${applyType === 'on' ? `功率：${ratedPower}W` : `机柜：${cabinetNumbering}`}）`}</Option>;
     });
   }
 
@@ -145,50 +116,6 @@ class ApplyUpOrDown extends Component {
     return options;
   }
 
-  renderUpApplyFormItem() {
-    const { getFieldDecorator } = this.props.form;
-    if (this.state.applyType === 'on') {
-      return (
-        [<FormItem
-          label="机柜编号："
-        >
-          {getFieldDecorator('cabinetNumbering', {
-            rules: [{
-              required: true,
-            }],
-          })(
-            <Select className={styles.select} onChange={this.selectCabinet}>
-              {this.renderCabinetOptions()}
-            </Select>)}
-        </FormItem>,
-        <FormItem
-          label="起始位置："
-        >
-          {getFieldDecorator('startPosition', {
-            rules: [{
-              required: true,
-            }],
-          })(
-            <Select className={styles.select}>
-              {this.renderPositionOptions()}
-            </Select>)}
-        </FormItem>,
-        <FormItem
-          label="结束位置："
-        >
-          {getFieldDecorator('endPosition', {
-            rules: [{
-              required: true,
-            }],
-          })(
-            <Select className={styles.select}>
-              {this.renderPositionOptions()}
-            </Select>)}
-        </FormItem>]
-      );
-    }
-  }
-
   render() {
     const { getFieldDecorator } = this.props.form;
     const applyType = this.state.applyType;
@@ -201,7 +128,7 @@ class ApplyUpOrDown extends Component {
         onCancel={this.props.toggle}
       >
         <div className={`${indexStyles.all_form_div} ${styles.normal}`}>
-          <Form id="apply-up-or-down" onSubmit={applyType === 'on' ? this.applyOnCabinet : this.applyOffCabinet}>
+          <Form id="apply-up-or-down" onSubmit={applyType === 'on' ? this.applyOn : this.applyOff}>
             <div>
               <FormItem
                 label="申请类型："
@@ -213,8 +140,8 @@ class ApplyUpOrDown extends Component {
                   initialValue: 'on',
                 })(
                   <Select className={styles.select} onChange={this.selectApplyType}>
-                    <Option value="on">上柜</Option>
-                    <Option value="off">下柜</Option>
+                    <Option value="on">上电</Option>
+                    <Option value="off">下电</Option>
                   </Select>)}
               </FormItem>
               <FormItem
@@ -229,7 +156,6 @@ class ApplyUpOrDown extends Component {
                     {this.renderNumberingOptions()}
                   </Select>)}
               </FormItem>
-              {this.renderUpApplyFormItem()}
             </div>
             <div className={`${indexStyles.pt_20} ${indexStyles.pb_20} ${indexStyles.ta_c}`}>
               <Button htmlType="submit" type="primary" className={indexStyles.mr_20}>确 定</Button>
@@ -242,7 +168,7 @@ class ApplyUpOrDown extends Component {
   }
 }
 
-ApplyUpOrDown.propTypes = {
+ApplyOnOrOff.propTypes = {
   show: PropTypes.bool,
   onData: PropTypes.array,
   offData: PropTypes.array,
@@ -251,4 +177,4 @@ ApplyUpOrDown.propTypes = {
   refetch: PropTypes.func,
 };
 
-export default Form.create()(ApplyUpOrDown);
+export default Form.create()(ApplyOnOrOff);

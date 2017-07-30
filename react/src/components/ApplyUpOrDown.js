@@ -38,8 +38,6 @@ class ApplyUpOrDown extends Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        const cabinets = this.state.cabinets;
-        const cabinet = cabinets[values.cabinetNumbering];
         const body = new FormData();
         body.append('serverNumbering', values.Numbering);
         body.append('cabinetNumber', values.cabinetNumbering);
@@ -151,6 +149,7 @@ class ApplyUpOrDown extends Component {
       return (
         [<FormItem
           label="机柜编号："
+          key="cabinetNumbering"
         >
           {getFieldDecorator('cabinetNumbering', {
             rules: [{
@@ -163,6 +162,7 @@ class ApplyUpOrDown extends Component {
         </FormItem>,
         <FormItem
           label="起始位置："
+          key="startPosition"
         >
           {getFieldDecorator('startPosition', {
             rules: [{
@@ -175,6 +175,7 @@ class ApplyUpOrDown extends Component {
         </FormItem>,
         <FormItem
           label="结束位置："
+          key="endPosition"
         >
           {getFieldDecorator('endPosition', {
             rules: [{

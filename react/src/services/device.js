@@ -55,3 +55,10 @@ export async function reviewOnCabinet(body) {
     body,
   });
 }
+
+export async function reviewOn(body) {
+  return request('/review_on', {
+    method: 'post',
+    body,
+  });
+}
