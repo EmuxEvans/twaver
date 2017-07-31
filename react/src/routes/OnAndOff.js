@@ -32,6 +32,7 @@ export default class OnandOff extends Component {
       reviewingData: [],
       subData: [],
       show: false,
+      modalKey: 0,
     };
   }
 
@@ -91,12 +92,16 @@ export default class OnandOff extends Component {
           message.success('操作成功');
           this.loadData();
         }
+      })
+      .catch(() => {
+        message.error('操作失败');
       });
   }
 
   toggleApply = () => {
     this.setState({
       show: !this.state.show,
+      modalKey: Math.random(),
     });
   }
 
@@ -113,7 +118,7 @@ export default class OnandOff extends Component {
 
 
   render() {
-    const { data, onData, offData, reviewingData, show } = this.state;
+    const { data, onData, offData, reviewingData, show, modalKey } = this.state;
     let dataSource = data;
     const columns = JSON.parse(JSON.stringify(this.columns));
 
@@ -138,6 +143,7 @@ export default class OnandOff extends Component {
     return (
       <div>
         <ApplyOnOrOff
+          modalKey={modalKey}
           show={show}
           onData={onData}
           offData={offData}

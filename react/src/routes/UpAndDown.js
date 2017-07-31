@@ -96,7 +96,7 @@ export default class NestedTable extends Component {
   postReview = (status, numbering, on) => {
     const body = new FormData();
     body.append('status', status);
-    body.append('on', on);
+    body.append('onCabinet', on);
     body.append('serverNumbering', numbering);
     fetchDevice.reviewOnCabinet(body)
       .then((res) => {
@@ -104,6 +104,9 @@ export default class NestedTable extends Component {
           message.success('操作成功');
           this.loadData();
         }
+      })
+      .catch(() => {
+        message.error('操作失败');
       });
   }
 

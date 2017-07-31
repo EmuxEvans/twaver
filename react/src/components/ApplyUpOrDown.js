@@ -8,9 +8,6 @@ import indexStyles from '../index.less';
 import styles from './Apply.less';
 
 const Option = Select.Option;
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
 
 class ApplyUpOrDown extends Component {
   constructor(props) {
@@ -48,6 +45,9 @@ class ApplyUpOrDown extends Component {
             message.success('申请已发送，等待审核');
             this.props.toggle();
             this.props.refetch();
+          })
+          .catch(() => {
+            message.error('操作失败');
           });
       }
     });
@@ -71,6 +71,9 @@ class ApplyUpOrDown extends Component {
             }
             this.props.toggle();
             this.props.refetch();
+          })
+          .catch(() => {
+            message.error('操作失败');
           });
       }
     });
@@ -202,7 +205,7 @@ class ApplyUpOrDown extends Component {
         onCancel={this.props.toggle}
       >
         <div className={`${indexStyles.all_form_div} ${styles.normal}`}>
-          <Form id="apply-up-or-down" onSubmit={applyType === 'on' ? this.applyOnCabinet : this.applyOffCabinet}>
+          <Form onSubmit={applyType === 'on' ? this.applyOnCabinet : this.applyOffCabinet}>
             <div>
               <FormItem
                 label="申请类型："

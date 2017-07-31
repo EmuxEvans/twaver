@@ -40,6 +40,9 @@ class ApplyOnOrOff extends Component {
             }
             this.props.toggle();
             this.props.refetch();
+          })
+          .catch(() => {
+            message.error('操作失败');
           });
       }
     });
@@ -59,12 +62,15 @@ class ApplyOnOrOff extends Component {
             if (res.status === 'success') {
               message.success('申请已发送，等待审核');
             } else if (res.status === 'reviewing') {
-              message.success('成功下柜');
+              message.success('成功下电');
             } else if (res.status === 'onfalse') {
-              return message.error('该设备未上柜，无法下柜');
+              return message.error('该设备未上电，无法下电');
             }
             this.props.toggle();
             this.props.refetch();
+          })
+          .catch(() => {
+            message.error('操作失败');
           });
       }
     });
@@ -79,12 +85,6 @@ class ApplyOnOrOff extends Component {
   selectNumbering = (value) => {
     this.setState({
       Numbering: value,
-    });
-  }
-
-  selectCabinet = (value) => {
-    this.setState({
-      selectedCabinet: value,
     });
   }
 
@@ -121,14 +121,14 @@ class ApplyOnOrOff extends Component {
     const applyType = this.state.applyType;
     return (
       <Modal
-        key={2}
+        key={this.props.modalKey}
         visible={this.props.show}
         title="上/下柜申请"
         footer={null}
         onCancel={this.props.toggle}
       >
         <div className={`${indexStyles.all_form_div} ${styles.normal}`}>
-          <Form id="apply-up-or-down" onSubmit={applyType === 'on' ? this.applyOn : this.applyOff}>
+          <Form onSubmit={applyType === 'on' ? this.applyOn : this.applyOff}>
             <div>
               <FormItem
                 label="申请类型："
@@ -169,6 +169,7 @@ class ApplyOnOrOff extends Component {
 }
 
 ApplyOnOrOff.propTypes = {
+  modalKey: PropTypes.number,
   show: PropTypes.bool,
   onData: PropTypes.array,
   offData: PropTypes.array,
