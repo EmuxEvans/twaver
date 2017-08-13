@@ -25,7 +25,7 @@ class Nsider extends React.Component {
         [<SubMenu key="sub3" title={<span><Icon type="setting" /><span>设置警告阈值</span></span>}>
           <Menu.Item key={`/${auth}/threshold`}><Link to={`/${auth}/threshold`}>设置阈值</Link></Menu.Item>
         </SubMenu>,
-        <SubMenu key="sub4" title={<span><Icon type="setting" /><span>上/下电/柜管理</span></span>}>
+        <SubMenu key="sub4" title={<span><Icon type="setting" /><span>上/下电/柜审核</span></span>}>
           <Menu.Item key={`/${auth}/onandoff`}><Link to={`/${auth}/onandoff`}>上/下电</Link></Menu.Item>
           <Menu.Item key={`/${auth}/upanddown`}><Link to={`/${auth}/upanddown`}>上/下柜</Link></Menu.Item>
         </SubMenu>]

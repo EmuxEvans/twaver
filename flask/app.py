@@ -455,7 +455,6 @@ def find_candidate_position(power, height):
     client = MongoClient()
     db = client.IDCs
     cabinet = db.Cabinet.find()
-    servers = db.server.find()
     for record in cabinet:
         cabinetNumbering = record["Numbering"]
         cabinetUnumber = record["uNumber"]
@@ -465,8 +464,9 @@ def find_candidate_position(power, height):
         list_length = int(cabinetUnumber)
         current_usage = [initial_value for i in range(list_length)]
 
+        servers = db.server.find()
         for server in servers:
-            print server
+            # print server
             if server["cabinetNumbering"] == cabinetNumbering:
                 start = int(server["startPosition"])
                 end = int(server["endPosition"])
