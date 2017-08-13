@@ -49,6 +49,7 @@ export default class NestedTable extends Component {
       reviewingData: [],
       subData: [],
       show: false,
+      modalKey: 0,
     };
   }
 
@@ -148,6 +149,7 @@ export default class NestedTable extends Component {
   toggleApply = () => {
     this.setState({
       show: !this.state.show,
+      modalKey: Math.random(),
     });
   }
 
@@ -168,7 +170,7 @@ export default class NestedTable extends Component {
   }
 
   render() {
-    const { onData, offData, reviewingData, show, data } = this.state;
+    const { onData, offData, reviewingData, show, data, modalKey } = this.state;
     let dataSource = data;
     const auth = utility.getAuth(this.props);
     const columns = JSON.parse(JSON.stringify(this.columns));
@@ -192,6 +194,7 @@ export default class NestedTable extends Component {
     return (
       <div>
         <ApplyUpOrDown
+          modalKey={modalKey}
           show={show}
           onData={onData}
           offData={offData}

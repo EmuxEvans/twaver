@@ -198,7 +198,7 @@ class ApplyUpOrDown extends Component {
     const applyType = this.state.applyType;
     return (
       <Modal
-        key={2}
+        key={this.props.modalKey}
         visible={this.props.show}
         title="上/下柜申请"
         footer={null}
@@ -247,6 +247,7 @@ class ApplyUpOrDown extends Component {
 }
 
 ApplyUpOrDown.propTypes = {
+  modalKey: PropTypes.number,
   show: PropTypes.bool,
   onData: PropTypes.array,
   offData: PropTypes.array,
